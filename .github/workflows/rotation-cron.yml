@@ -1,0 +1,53 @@
+name: Weekly Rotation
+
+on:
+  schedule:
+    # Every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: 'Trigger type (scheduler or manual)'
+        required: false
+        default: 'manual'
+      seed_override:
+        description: 'Optional seed override for deterministic selection'
+        required: false
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Trigger rotation
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          TRIGGER="${{ github.event.inputs.trigger || 'scheduler' }}"
+          SEED="${{ github.event.inputs.seed_override || '' }}"
+
+          BODY="{\"trigger\":\"${TRIGGER}\""
+          if [ -n "$SEED" ]; then
+            BODY="${BODY},\"seed_override\":\"${SEED}\""
+          fi
+          BODY="${BODY}}"
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -d "$BODY" \
+            "${SUPABASE_URL}/functions/v1/rotation-run")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY_CONTENT=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: ${HTTP_CODE}"
+          echo "Response: ${BODY_CONTENT}"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Rotation failed with status ${HTTP_CODE}"
+            exit 1
+          fi
