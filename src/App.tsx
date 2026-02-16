@@ -3,7 +3,7 @@ import type { Game } from './types/game';
 import { launchGame } from './services/gameLauncher';
 import { AuthProvider } from './auth/AuthContext';
 import { useProfile } from './hooks/useProfile';
-import { track } from './analytics/track';
+import { track, initTransport } from './analytics/track';
 import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
 
@@ -13,6 +13,7 @@ function AppContent() {
 
   useEffect(() => {
     track('app_open', {});
+    initTransport();
   }, []);
 
   const handleLaunch = useCallback((game: Game) => {

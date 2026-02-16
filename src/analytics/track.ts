@@ -1,7 +1,11 @@
 import type { EventMap, EventName, TelemetryEvent } from './schema';
 import { enqueue, drain, size } from './queue';
+import { sendEvents } from './transport';
 
 const PROFILE_KEY = 'basil_profile';
+const FLUSH_INTERVAL_MS = 30_000;
+
+let intervalId: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Check opt-out directly from localStorage so the analytics module
@@ -29,6 +33,7 @@ export function track<K extends EventName>(
   if (isOptedOut()) return;
 
   const event: TelemetryEvent<K> = {
+    id: crypto.randomUUID(),
     name,
     payload,
     timestamp: Date.now(),
@@ -38,8 +43,7 @@ export function track<K extends EventName>(
 }
 
 /**
- * Drain all queued events. Intended for a future transport layer
- * that ships events to a backend.
+ * Drain all queued events and return them.
  */
 export function flushEvents(): TelemetryEvent[] {
   return drain();
@@ -50,4 +54,30 @@ export function flushEvents(): TelemetryEvent[] {
  */
 export function queueSize(): number {
   return size();
+}
+
+async function autoFlush(): Promise<void> {
+  const events = flushEvents();
+  if (events.length === 0) return;
+  await sendEvents(events);
+}
+
+/**
+ * Start the auto-flush transport. Call once at app startup.
+ * Sets up a 30-second periodic flush and a beforeunload flush.
+ */
+export function initTransport(): void {
+  if (intervalId !== null) return;
+  intervalId = setInterval(() => void autoFlush(), FLUSH_INTERVAL_MS);
+  window.addEventListener('beforeunload', () => void autoFlush());
+}
+
+/**
+ * Stop the auto-flush transport. Useful for test teardown.
+ */
+export function stopTransport(): void {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
 }

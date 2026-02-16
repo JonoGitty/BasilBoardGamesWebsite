@@ -57,4 +57,19 @@ describe('track', () => {
     expect(events.length).toBe(2);
     expect(queueSize()).toBe(0);
   });
+
+  it('assigns a UUID id to each event', () => {
+    track('app_open', {});
+    const events = flushEvents();
+    expect(events[0].id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
+  });
+
+  it('assigns unique ids to each event', () => {
+    track('app_open', {});
+    track('card_click', { gameId: 'almost' });
+    const events = flushEvents();
+    expect(events[0].id).not.toBe(events[1].id);
+  });
 });

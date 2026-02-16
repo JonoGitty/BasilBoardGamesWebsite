@@ -17,6 +17,7 @@ export interface EventMap {
 export type EventName = keyof EventMap;
 
 export interface TelemetryEvent<K extends EventName = EventName> {
+  id: string;
   name: K;
   payload: EventMap[K];
   timestamp: number;
