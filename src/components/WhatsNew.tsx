@@ -1,40 +1,46 @@
-interface NewsItem {
-  id: string;
-  emoji: string;
-  title: string;
-  description: string;
-}
+import { useMemo, useState } from 'react';
+import { WHATS_NEW_POSTS } from '../data/whatsNew';
+import WhatsNewItem from './WhatsNewItem';
 
-const NEWS_ITEMS: NewsItem[] = [
-  {
-    id: '1',
-    emoji: '\u{1F3B2}',
-    title: 'Game Night This Friday',
-    description: 'Join us for an evening of Catan, Azul, and more at the community hall.',
-  },
-  {
-    id: '2',
-    emoji: '\u{1F0CF}',
-    title: 'New Arrivals: Wingspan Expansion',
-    description: 'The Oceania expansion is now available to borrow from our library.',
-  },
-];
+const PREVIEW_COUNT = 3;
 
 export default function WhatsNew() {
+  const [expanded, setExpanded] = useState(false);
+
+  const sorted = useMemo(
+    () =>
+      [...WHATS_NEW_POSTS].sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      ),
+    [],
+  );
+
+  const visible = expanded ? sorted : sorted.slice(0, PREVIEW_COUNT);
+  const hasMore = sorted.length > PREVIEW_COUNT;
+
+  if (sorted.length === 0) {
+    return (
+      <section className="whats-new" aria-label="What's new">
+        <h2 className="whats-new__heading">What's New</h2>
+        <p className="whats-new__empty">Nothing new yet — check back soon.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="whats-new" aria-label="What's new">
       <h2 className="whats-new__heading">What's New</h2>
-      {NEWS_ITEMS.map((item) => (
-        <article key={item.id} className="whats-new__item">
-          <div className="whats-new__thumb" aria-hidden="true">
-            {item.emoji}
-          </div>
-          <div className="whats-new__text">
-            <div className="whats-new__title">{item.title}</div>
-            <p className="whats-new__desc">{item.description}</p>
-          </div>
-        </article>
+      {visible.map((post) => (
+        <WhatsNewItem key={post.id} post={post} />
       ))}
+      {hasMore && (
+        <button
+          className="whats-new__toggle"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? 'Show less' : `View all (${sorted.length})`}
+        </button>
+      )}
     </section>
   );
 }

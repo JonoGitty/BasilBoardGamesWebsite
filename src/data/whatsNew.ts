@@ -1,0 +1,60 @@
+import type { WhatsNewPost } from '../types/whatsNew';
+
+export const WHATS_NEW_POSTS: WhatsNewPost[] = [
+  {
+    id: 'ann-game-night',
+    title: 'Game Night This Friday',
+    description: 'Join us for an evening of Almost, Sidequests, and more at the community hall. Doors open at 6 pm.',
+    emoji: '\u{1F3B2}',
+    category: 'announcement',
+    publishedAt: '2026-02-14',
+  },
+  {
+    id: 'patch-almost-v1.2',
+    title: 'Almost v1.2 Balance Patch',
+    description: 'Adjusted scoring for near-miss rounds and fixed the tie-breaker edge case.',
+    emoji: '\u{1F527}',
+    category: 'patch',
+    publishedAt: '2026-02-12',
+  },
+  {
+    id: 'exp-elam-draft',
+    title: 'Elam: Draft Variant Experiment',
+    description: 'Trying a card-draft opener before the main trade phase. Playtest feedback welcome.',
+    emoji: '\u{1F9EA}',
+    category: 'experiment',
+    publishedAt: '2026-02-10',
+  },
+  {
+    id: 'ann-hex-havoc-launch',
+    title: 'Hex Havoc Now Active',
+    description: 'Our newest territorial strategy game is live in the library. Grab a copy and try it out.',
+    emoji: '\u{2B21}',
+    category: 'announcement',
+    publishedAt: '2026-02-08',
+  },
+  {
+    id: 'patch-interrogate-v2.0',
+    title: 'Interrogate v2.0 Overhaul',
+    description: 'Major rules rewrite: new question deck, shorter rounds, and a solo mode.',
+    emoji: '\u{1F4CB}',
+    category: 'patch',
+    publishedAt: '2026-02-05',
+  },
+  {
+    id: 'exp-sidequests-coop',
+    title: 'Sidequests Co-op Mode Test',
+    description: 'Can Sidequests work as a fully cooperative experience? Early playtests say yes.',
+    emoji: '\u{1F91D}',
+    category: 'experiment',
+    publishedAt: '2026-02-01',
+  },
+  {
+    id: 'ann-tall-tales-preview',
+    title: 'Tall Tales: Sneak Peek',
+    description: 'First look at the storytelling bluff game joining the active roster next month.',
+    emoji: '\u{1F4D6}',
+    category: 'announcement',
+    publishedAt: '2026-01-28',
+  },
+];
