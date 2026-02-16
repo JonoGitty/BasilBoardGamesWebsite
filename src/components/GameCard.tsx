@@ -3,14 +3,16 @@ import type { Game } from '../types/game';
 interface GameCardProps {
   game: Game;
   style?: React.CSSProperties;
+  onLaunch?: (game: Game) => void;
 }
 
-export default function GameCard({ game, style }: GameCardProps) {
+export default function GameCard({ game, style, onLaunch }: GameCardProps) {
   return (
     <button
       className="card-fan__card"
-      aria-label={game.title}
+      aria-label={`Play ${game.title}`}
       style={style}
+      onClick={() => onLaunch?.(game)}
     >
       <span className="card-fan__icon" aria-hidden="true">
         {game.emoji}

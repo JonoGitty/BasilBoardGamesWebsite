@@ -1,10 +1,15 @@
 import { useState, useCallback } from 'react';
+import type { Game } from '../types/game';
 import TopBar from './TopBar';
 import WhatsNew from './WhatsNew';
 import GameCarousel from './GameCarousel';
 import AccountDrawer from './AccountDrawer';
 
-export default function LayoutShell() {
+interface LayoutShellProps {
+  onLaunchGame: (game: Game) => void;
+}
+
+export default function LayoutShell({ onLaunchGame }: LayoutShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
@@ -15,7 +20,7 @@ export default function LayoutShell() {
       <TopBar onMenuOpen={openDrawer} />
       <main className="shell">
         <WhatsNew />
-        <GameCarousel />
+        <GameCarousel onLaunch={onLaunchGame} />
         <AccountDrawer open={drawerOpen} onClose={closeDrawer} />
       </main>
     </>

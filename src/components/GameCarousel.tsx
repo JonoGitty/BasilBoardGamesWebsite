@@ -1,3 +1,4 @@
+import type { Game } from '../types/game';
 import { useFeaturedGames } from '../hooks/useFeaturedGames';
 import GameCard from './GameCard';
 
@@ -14,7 +15,11 @@ function fanStyle(index: number, total: number): React.CSSProperties {
   } as React.CSSProperties;
 }
 
-export default function GameCarousel() {
+interface GameCarouselProps {
+  onLaunch: (game: Game) => void;
+}
+
+export default function GameCarousel({ onLaunch }: GameCarouselProps) {
   const games = useFeaturedGames();
 
   return (
@@ -24,6 +29,7 @@ export default function GameCarousel() {
           key={game.id}
           game={game}
           style={fanStyle(i, games.length)}
+          onLaunch={onLaunch}
         />
       ))}
     </section>
