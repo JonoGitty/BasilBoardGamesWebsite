@@ -1,0 +1,396 @@
+/* ── Reset & base ─────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar (mobile) ─────────────────────────────────── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 var(--space-md);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-bar__title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.top-bar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.top-bar__btn:hover,
+.top-bar__btn:focus-visible {
+  background: var(--bg-card);
+  outline: none;
+}
+
+/* ── Layout shell ─────────────────────────────────────── */
+.shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+}
+
+/* ── What's New panel ─────────────────────────────────── */
+.whats-new {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+}
+
+.whats-new__heading {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+.whats-new__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.whats-new__item:last-child {
+  border-bottom: none;
+}
+
+.whats-new__thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.whats-new__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.whats-new__title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.whats-new__desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Card carousel (fanned hand) ──────────────────────── */
+.card-fan {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: var(--space-xl) var(--space-md);
+  min-height: 260px;
+  overflow: visible;
+}
+
+.card-fan__card {
+  width: 140px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform-origin: bottom center;
+  transition:
+    transform var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
+  position: relative;
+  /* Overlap cards to create fanned look */
+  margin-left: -30px;
+  /* Default touch target met by card dimensions */
+}
+
+.card-fan__card:first-child {
+  margin-left: 0;
+}
+
+.card-fan__card:hover,
+.card-fan__card:focus-visible {
+  transform: translateY(-16px) scale(1.05);
+  box-shadow: var(--shadow-elevated);
+  z-index: 10;
+  outline: none;
+  border-color: var(--accent);
+}
+
+.card-fan__card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-fan__icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-sm);
+}
+
+.card-fan__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  padding: 0 var(--space-sm);
+}
+
+/* Apply fanned rotation to individual cards */
+.card-fan__card:nth-child(1) { transform: rotate(-12deg); }
+.card-fan__card:nth-child(2) { transform: rotate(-6deg); }
+.card-fan__card:nth-child(3) { transform: rotate(0deg); }
+.card-fan__card:nth-child(4) { transform: rotate(6deg); }
+.card-fan__card:nth-child(5) { transform: rotate(12deg); }
+
+.card-fan__card:nth-child(1):hover,
+.card-fan__card:nth-child(1):focus-visible { transform: rotate(-12deg) translateY(-16px) scale(1.05); }
+.card-fan__card:nth-child(2):hover,
+.card-fan__card:nth-child(2):focus-visible { transform: rotate(-6deg) translateY(-16px) scale(1.05); }
+.card-fan__card:nth-child(3):hover,
+.card-fan__card:nth-child(3):focus-visible { transform: rotate(0deg) translateY(-16px) scale(1.05); }
+.card-fan__card:nth-child(4):hover,
+.card-fan__card:nth-child(4):focus-visible { transform: rotate(6deg) translateY(-16px) scale(1.05); }
+.card-fan__card:nth-child(5):hover,
+.card-fan__card:nth-child(5):focus-visible { transform: rotate(12deg) translateY(-16px) scale(1.05); }
+
+/* ── Account sidebar / drawer ─────────────────────────── */
+.account-drawer {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+}
+
+.account-drawer__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.account-drawer__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.account-drawer__name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.account-drawer__nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.account-drawer__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--tap-min);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  font-family: inherit;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.account-drawer__link:hover,
+.account-drawer__link:focus-visible {
+  background: var(--bg-card);
+  outline: none;
+}
+
+.account-drawer__link-icon {
+  width: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ── Mobile overlay drawer ────────────────────────────── */
+.drawer-overlay {
+  display: none;
+}
+
+.drawer-overlay--open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  z-index: 201;
+  background: var(--bg-surface);
+  padding: var(--space-lg);
+  transform: translateX(100%);
+  transition: transform var(--duration-normal) var(--ease-out);
+  overflow-y: auto;
+}
+
+.drawer-overlay--open .drawer-panel {
+  transform: translateX(0);
+}
+
+.drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+  margin-bottom: var(--space-md);
+  font-size: 1.25rem;
+}
+
+.drawer-close:hover,
+.drawer-close:focus-visible {
+  background: var(--bg-card);
+  outline: none;
+}
+
+/* ── Desktop layout ───────────────────────────────────── */
+@media (min-width: 1024px) {
+  .top-bar {
+    display: none;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .whats-new {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .card-fan {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 320px;
+  }
+
+  .card-fan__card {
+    width: 160px;
+    height: 230px;
+  }
+
+  .account-drawer {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: start;
+    position: sticky;
+    top: var(--space-xl);
+  }
+
+  .drawer-overlay {
+    display: none !important;
+  }
+
+  .account-sidebar {
+    display: block;
+  }
+}
+
+/* Hide account sidebar on mobile — shown via drawer instead */
+@media (max-width: 1023px) {
+  .account-sidebar {
+    display: none;
+  }
+}

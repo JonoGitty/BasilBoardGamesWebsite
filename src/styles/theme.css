@@ -1,0 +1,53 @@
+/* ── Design tokens ─────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --bg-base: #1a1a1e;
+  --bg-surface: #242429;
+  --bg-card: #2c2c33;
+  --bg-card-hover: #35353d;
+
+  /* Text */
+  --text-primary: #e8e8ec;
+  --text-secondary: #9e9ea8;
+  --text-muted: #6b6b76;
+
+  /* Accent */
+  --accent: #7c6ff7;
+  --accent-hover: #9589fa;
+
+  /* Borders & shadows */
+  --border: #38383f;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Touch target minimum */
+  --tap-min: 44px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+
+  /* Breakpoints (reference — used in media queries) */
+  /* --bp-tablet: 640px; */
+  /* --bp-desktop: 1024px; */
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+}
