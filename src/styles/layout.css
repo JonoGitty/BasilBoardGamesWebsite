@@ -146,6 +146,7 @@ body {
 }
 
 .card-fan__card {
+  --fan-rotate: 0deg;
   width: 140px;
   height: 200px;
   border-radius: var(--radius-md);
@@ -158,13 +159,12 @@ body {
   justify-content: center;
   cursor: pointer;
   transform-origin: bottom center;
+  transform: rotate(var(--fan-rotate));
   transition:
     transform var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out);
   position: relative;
-  /* Overlap cards to create fanned look */
   margin-left: -30px;
-  /* Default touch target met by card dimensions */
 }
 
 .card-fan__card:first-child {
@@ -173,7 +173,7 @@ body {
 
 .card-fan__card:hover,
 .card-fan__card:focus-visible {
-  transform: translateY(-16px) scale(1.05);
+  transform: rotate(var(--fan-rotate)) translateY(-16px) scale(1.05);
   box-shadow: var(--shadow-elevated);
   z-index: 10;
   outline: none;
@@ -197,24 +197,6 @@ body {
   text-align: center;
   padding: 0 var(--space-sm);
 }
-
-/* Apply fanned rotation to individual cards */
-.card-fan__card:nth-child(1) { transform: rotate(-12deg); }
-.card-fan__card:nth-child(2) { transform: rotate(-6deg); }
-.card-fan__card:nth-child(3) { transform: rotate(0deg); }
-.card-fan__card:nth-child(4) { transform: rotate(6deg); }
-.card-fan__card:nth-child(5) { transform: rotate(12deg); }
-
-.card-fan__card:nth-child(1):hover,
-.card-fan__card:nth-child(1):focus-visible { transform: rotate(-12deg) translateY(-16px) scale(1.05); }
-.card-fan__card:nth-child(2):hover,
-.card-fan__card:nth-child(2):focus-visible { transform: rotate(-6deg) translateY(-16px) scale(1.05); }
-.card-fan__card:nth-child(3):hover,
-.card-fan__card:nth-child(3):focus-visible { transform: rotate(0deg) translateY(-16px) scale(1.05); }
-.card-fan__card:nth-child(4):hover,
-.card-fan__card:nth-child(4):focus-visible { transform: rotate(6deg) translateY(-16px) scale(1.05); }
-.card-fan__card:nth-child(5):hover,
-.card-fan__card:nth-child(5):focus-visible { transform: rotate(12deg) translateY(-16px) scale(1.05); }
 
 /* ── Account sidebar / drawer ─────────────────────────── */
 .account-drawer {

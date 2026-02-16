@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import TopBar from './TopBar';
 import WhatsNew from './WhatsNew';
-import CardFan from './CardFan';
+import GameCarousel from './GameCarousel';
 import AccountDrawer from './AccountDrawer';
 
 export default function LayoutShell() {
@@ -15,7 +15,7 @@ export default function LayoutShell() {
       <TopBar onMenuOpen={openDrawer} />
       <main className="shell">
         <WhatsNew />
-        <CardFan />
+        <GameCarousel />
         <AccountDrawer open={drawerOpen} onClose={closeDrawer} />
       </main>
     </>
