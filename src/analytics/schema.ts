@@ -18,6 +18,7 @@ export interface EventMap {
   admin_post_publish: { postId: string };
   admin_post_unpublish: { postId: string };
   admin_post_delete: { postId: string };
+  admin_metrics_view: Record<string, never>;
 }
 
 export type EventName = keyof EventMap;

@@ -18,6 +18,7 @@ const VALID_EVENT_NAMES = [
   "admin_post_publish",
   "admin_post_unpublish",
   "admin_post_delete",
+  "admin_metrics_view",
 ] as const;
 
 type EventName = (typeof VALID_EVENT_NAMES)[number];

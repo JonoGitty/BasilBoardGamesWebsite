@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import AdminGamesTab from './AdminGamesTab';
 import AdminPostsTab from './AdminPostsTab';
+import MetricsTab from './MetricsTab';
 
-type AdminTab = 'games' | 'posts';
+type AdminTab = 'games' | 'posts' | 'metrics';
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -34,10 +35,16 @@ export default function AdminPanel({ onBack }: AdminPanelProps) {
           >
             Posts
           </button>
+          <button
+            className={`admin__tab${tab === 'metrics' ? ' admin__tab--active' : ''}`}
+            onClick={() => setTab('metrics')}
+          >
+            Metrics
+          </button>
         </nav>
       </header>
       <div className="admin__content">
-        {tab === 'games' ? <AdminGamesTab /> : <AdminPostsTab />}
+        {tab === 'games' ? <AdminGamesTab /> : tab === 'posts' ? <AdminPostsTab /> : <MetricsTab />}
       </div>
     </div>
   );
