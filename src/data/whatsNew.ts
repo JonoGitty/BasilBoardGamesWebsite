@@ -26,14 +26,6 @@ export const WHATS_NEW_POSTS: WhatsNewPost[] = [
     publishedAt: '2026-02-10',
   },
   {
-    id: 'ann-hex-havoc-launch',
-    title: 'Hex Havoc Now Active',
-    description: 'Our newest territorial strategy game is live in the library. Grab a copy and try it out.',
-    emoji: '\u{2B21}',
-    category: 'announcement',
-    publishedAt: '2026-02-08',
-  },
-  {
     id: 'patch-interrogate-v2.0',
     title: 'Interrogate v2.0 Overhaul',
     description: 'Major rules rewrite: new question deck, shorter rounds, and a solo mode.',
@@ -48,13 +40,5 @@ export const WHATS_NEW_POSTS: WhatsNewPost[] = [
     emoji: '\u{1F91D}',
     category: 'experiment',
     publishedAt: '2026-02-01',
-  },
-  {
-    id: 'ann-tall-tales-preview',
-    title: 'Tall Tales: Sneak Peek',
-    description: 'First look at the storytelling bluff game joining the active roster next month.',
-    emoji: '\u{1F4D6}',
-    category: 'announcement',
-    publishedAt: '2026-01-28',
   },
 ];

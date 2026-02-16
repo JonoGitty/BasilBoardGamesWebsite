@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Verify site is reachable
         run: |
-          SITE_URL="https://jonogitty.github.io/BasilBoardGamesWebsite/"
+          SITE_URL="https://basilboardgames.co.uk/"
           STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$SITE_URL")
           echo "HTTP status: $STATUS"
           if [ "$STATUS" -ne 200 ]; then

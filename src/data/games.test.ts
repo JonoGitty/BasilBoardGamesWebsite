@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { GAMES } from './games';
 
 describe('games manifest', () => {
-  it('has at least 5 active games', () => {
+  it('has at least 4 active games', () => {
     const active = GAMES.filter((g) => g.status === 'active');
-    expect(active.length).toBeGreaterThanOrEqual(5);
+    expect(active.length).toBeGreaterThanOrEqual(4);
   });
 
   it('all games have required fields', () => {
