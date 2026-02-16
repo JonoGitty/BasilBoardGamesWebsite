@@ -1,39 +1,56 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { Profile } from '../types/profile';
+import SettingsPanel from './SettingsPanel';
 
 interface AccountDrawerProps {
   open: boolean;
   onClose: () => void;
+  profile: Profile;
+  onUpdateProfile: (patch: Partial<Profile>) => void;
+  onResetProfile: () => void;
 }
+
+type View = 'nav' | 'settings';
 
 interface NavItem {
   icon: string;
   label: string;
+  action?: View;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { icon: '\u{1F464}', label: 'Account' },
-  { icon: '\u{2699}\uFE0F', label: 'Settings' },
+  { icon: '\u{2699}\uFE0F', label: 'Settings', action: 'settings' },
   { icon: '\u{1F514}', label: 'Notifications' },
   { icon: '\u{1F6AA}', label: 'Log Out' },
 ];
 
-function AccountNav() {
+function AccountNav({
+  profile,
+  onNavigate,
+}: {
+  profile: Profile;
+  onNavigate: (view: View) => void;
+}) {
   return (
     <>
       <div className="account-drawer__header">
-        <div className="account-drawer__avatar" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
-          </svg>
+        <div
+          className="account-drawer__avatar"
+          style={{ borderColor: profile.accentColor }}
+          aria-hidden="true"
+        >
+          {profile.avatarIcon}
         </div>
-        <span className="account-drawer__name">Player</span>
+        <span className="account-drawer__name">{profile.nickname || 'Player'}</span>
       </div>
       <nav>
         <ul className="account-drawer__nav">
           {NAV_ITEMS.map((item) => (
             <li key={item.label}>
-              <button className="account-drawer__link">
+              <button
+                className="account-drawer__link"
+                onClick={() => item.action && onNavigate(item.action)}
+              >
                 <span className="account-drawer__link-icon" aria-hidden="true">
                   {item.icon}
                 </span>
@@ -47,7 +64,38 @@ function AccountNav() {
   );
 }
 
-export default function AccountDrawer({ open, onClose }: AccountDrawerProps) {
+function DrawerContent({
+  profile,
+  onUpdateProfile,
+  onResetProfile,
+}: {
+  profile: Profile;
+  onUpdateProfile: (patch: Partial<Profile>) => void;
+  onResetProfile: () => void;
+}) {
+  const [view, setView] = useState<View>('nav');
+
+  if (view === 'settings') {
+    return (
+      <SettingsPanel
+        profile={profile}
+        onUpdate={onUpdateProfile}
+        onReset={onResetProfile}
+        onBack={() => setView('nav')}
+      />
+    );
+  }
+
+  return <AccountNav profile={profile} onNavigate={setView} />;
+}
+
+export default function AccountDrawer({
+  open,
+  onClose,
+  profile,
+  onUpdateProfile,
+  onResetProfile,
+}: AccountDrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,7 +108,6 @@ export default function AccountDrawer({ open, onClose }: AccountDrawerProps) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
-  // Trap focus back to close button on Shift+Tab from first focusable
   useEffect(() => {
     if (!open || !panelRef.current) return;
     const close = panelRef.current.querySelector<HTMLButtonElement>('.drawer-close');
@@ -71,7 +118,11 @@ export default function AccountDrawer({ open, onClose }: AccountDrawerProps) {
     <>
       {/* Desktop: always-visible sidebar */}
       <aside className="account-sidebar account-drawer" aria-label="Account menu">
-        <AccountNav />
+        <DrawerContent
+          profile={profile}
+          onUpdateProfile={onUpdateProfile}
+          onResetProfile={onResetProfile}
+        />
       </aside>
 
       {/* Mobile: overlay drawer */}
@@ -94,7 +145,11 @@ export default function AccountDrawer({ open, onClose }: AccountDrawerProps) {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <AccountNav />
+          <DrawerContent
+            profile={profile}
+            onUpdateProfile={onUpdateProfile}
+            onResetProfile={onResetProfile}
+          />
         </div>
       </div>
     </>
