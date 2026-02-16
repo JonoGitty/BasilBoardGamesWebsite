@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Profile } from '../types/profile';
+import { useAuth } from '../auth/AuthContext';
 import SettingsPanel from './SettingsPanel';
+import AuthForm from './AuthForm';
 
 interface AccountDrawerProps {
   open: boolean;
@@ -10,19 +12,7 @@ interface AccountDrawerProps {
   onResetProfile: () => void;
 }
 
-type View = 'nav' | 'settings';
-
-interface NavItem {
-  icon: string;
-  label: string;
-  action?: View;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { icon: '\u{2699}\uFE0F', label: 'Settings', action: 'settings' },
-  { icon: '\u{1F514}', label: 'Notifications' },
-  { icon: '\u{1F6AA}', label: 'Log Out' },
-];
+type View = 'nav' | 'settings' | 'auth';
 
 function AccountNav({
   profile,
@@ -31,6 +21,8 @@ function AccountNav({
   profile: Profile;
   onNavigate: (view: View) => void;
 }) {
+  const { user, signOut } = useAuth();
+
   return (
     <>
       <div className="account-drawer__header">
@@ -41,23 +33,56 @@ function AccountNav({
         >
           {profile.avatarIcon}
         </div>
-        <span className="account-drawer__name">{profile.nickname || 'Player'}</span>
+        <div>
+          <span className="account-drawer__name">{profile.nickname || 'Player'}</span>
+          {user && (
+            <span className="account-drawer__email">{user.email}</span>
+          )}
+        </div>
       </div>
       <nav>
         <ul className="account-drawer__nav">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.label}>
-              <button
-                className="account-drawer__link"
-                onClick={() => item.action && onNavigate(item.action)}
-              >
+          <li>
+            <button
+              className="account-drawer__link"
+              onClick={() => onNavigate('settings')}
+            >
+              <span className="account-drawer__link-icon" aria-hidden="true">
+                {'\u2699\uFE0F'}
+              </span>
+              Settings
+            </button>
+          </li>
+          <li>
+            <button className="account-drawer__link">
+              <span className="account-drawer__link-icon" aria-hidden="true">
+                {'\uD83D\uDD14'}
+              </span>
+              Notifications
+            </button>
+          </li>
+          {user ? (
+            <li>
+              <button className="account-drawer__link" onClick={signOut}>
                 <span className="account-drawer__link-icon" aria-hidden="true">
-                  {item.icon}
+                  {'\uD83D\uDEAA'}
                 </span>
-                {item.label}
+                Sign Out
               </button>
             </li>
-          ))}
+          ) : (
+            <li>
+              <button
+                className="account-drawer__link"
+                onClick={() => onNavigate('auth')}
+              >
+                <span className="account-drawer__link-icon" aria-hidden="true">
+                  {'\uD83D\uDD11'}
+                </span>
+                Sign In
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
     </>
@@ -84,6 +109,10 @@ function DrawerContent({
         onBack={() => setView('nav')}
       />
     );
+  }
+
+  if (view === 'auth') {
+    return <AuthForm onBack={() => setView('nav')} />;
   }
 
   return <AccountNav profile={profile} onNavigate={setView} />;

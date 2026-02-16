@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Game } from './types/game';
 import { launchGame } from './services/gameLauncher';
+import { AuthProvider } from './auth/AuthContext';
 import { useProfile } from './hooks/useProfile';
 import { track } from './analytics/track';
 import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
 
-export default function App() {
+function AppContent() {
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const { profile, update, reset } = useProfile();
 
@@ -36,5 +37,13 @@ export default function App() {
       onUpdateProfile={update}
       onResetProfile={reset}
     />
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

@@ -9,6 +9,9 @@ export interface EventMap {
   game_end: { gameId: string; durationMs: number };
   whats_new_expand: Record<string, never>;
   settings_change: { field: string };
+  auth_sign_up: { method: string };
+  auth_sign_in: { method: string };
+  auth_sign_out: Record<string, never>;
 }
 
 export type EventName = keyof EventMap;
