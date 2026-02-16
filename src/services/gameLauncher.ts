@@ -1,5 +1,6 @@
 import type { Game } from '../types/game';
 import { startSession } from './sessionTracker';
+import { track } from '../analytics/track';
 
 export type LaunchResult =
   | { mode: 'internal'; gameId: string }
@@ -15,8 +16,10 @@ export function launchGame(game: Game): LaunchResult {
 
   if (game.url) {
     window.open(game.url, '_blank', 'noopener');
+    track('game_start', { gameId: game.id, launchMode: 'external' });
     return { mode: 'external', gameId: game.id };
   }
 
+  track('game_start', { gameId: game.id, launchMode: 'internal' });
   return { mode: 'internal', gameId: game.id };
 }

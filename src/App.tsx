@@ -1,13 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Game } from './types/game';
 import { launchGame } from './services/gameLauncher';
 import { useProfile } from './hooks/useProfile';
+import { track } from './analytics/track';
 import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
 
 export default function App() {
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const { profile, update, reset } = useProfile();
+
+  useEffect(() => {
+    track('app_open', {});
+  }, []);
 
   const handleLaunch = useCallback((game: Game) => {
     const result = launchGame(game);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Game } from '../types/game';
 import { useSession } from '../hooks/useSession';
+import { track } from '../analytics/track';
 
 interface GameLaunchProps {
   game: Game;
@@ -22,6 +23,7 @@ export default function GameLaunch({ game, onExit }: GameLaunchProps) {
   const handleEnd = () => {
     const result = endCurrentSession();
     if (result) {
+      track('game_end', { gameId: game.id, durationMs: result.durationMs });
       setSummary(result);
     } else {
       onExit();

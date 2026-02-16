@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { WHATS_NEW_POSTS } from '../data/whatsNew';
+import { track } from '../analytics/track';
 import WhatsNewItem from './WhatsNewItem';
 
 const PREVIEW_COUNT = 3;
@@ -36,7 +37,12 @@ export default function WhatsNew() {
       {hasMore && (
         <button
           className="whats-new__toggle"
-          onClick={() => setExpanded((v) => !v)}
+          onClick={() => {
+            setExpanded((v) => {
+              if (!v) track('whats_new_expand', {});
+              return !v;
+            });
+          }}
         >
           {expanded ? 'Show less' : `View all (${sorted.length})`}
         </button>

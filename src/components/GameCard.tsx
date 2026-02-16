@@ -1,4 +1,5 @@
 import type { Game } from '../types/game';
+import { track } from '../analytics/track';
 
 interface GameCardProps {
   game: Game;
@@ -12,7 +13,10 @@ export default function GameCard({ game, style, onLaunch }: GameCardProps) {
       className="card-fan__card"
       aria-label={`Play ${game.title}`}
       style={style}
-      onClick={() => onLaunch?.(game)}
+      onClick={() => {
+        track('card_click', { gameId: game.id });
+        onLaunch?.(game);
+      }}
     >
       <span className="card-fan__icon" aria-hidden="true">
         {game.emoji}

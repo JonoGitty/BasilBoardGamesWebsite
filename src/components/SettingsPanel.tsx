@@ -1,5 +1,6 @@
 import type { Profile } from '../types/profile';
 import { AVATAR_ICONS, ACCENT_COLORS } from '../types/profile';
+import { track } from '../analytics/track';
 
 interface SettingsPanelProps {
   profile: Profile;
@@ -9,6 +10,13 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: SettingsPanelProps) {
+  const updateAndTrack = (patch: Partial<Profile>) => {
+    onUpdate(patch);
+    for (const field of Object.keys(patch)) {
+      track('settings_change', { field });
+    }
+  };
+
   return (
     <div className="settings">
       <button className="settings__back" onClick={onBack}>
@@ -27,7 +35,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
           type="text"
           value={profile.nickname}
           maxLength={20}
-          onChange={(e) => onUpdate({ nickname: e.target.value })}
+          onChange={(e) => updateAndTrack({ nickname: e.target.value })}
         />
       </label>
 
@@ -38,7 +46,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
             <button
               key={icon}
               className={`settings__icon-btn${profile.avatarIcon === icon ? ' settings__icon-btn--active' : ''}`}
-              onClick={() => onUpdate({ avatarIcon: icon })}
+              onClick={() => updateAndTrack({ avatarIcon: icon })}
               aria-label={`Select ${icon} avatar`}
               aria-pressed={profile.avatarIcon === icon}
             >
@@ -56,7 +64,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
               key={c.value}
               className={`settings__color-btn${profile.accentColor === c.value ? ' settings__color-btn--active' : ''}`}
               style={{ background: c.value }}
-              onClick={() => onUpdate({ accentColor: c.value })}
+              onClick={() => updateAndTrack({ accentColor: c.value })}
               aria-label={c.label}
               aria-pressed={profile.accentColor === c.value}
             />
@@ -72,7 +80,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
           type="checkbox"
           className="settings__checkbox"
           checked={profile.reducedMotion}
-          onChange={(e) => onUpdate({ reducedMotion: e.target.checked })}
+          onChange={(e) => updateAndTrack({ reducedMotion: e.target.checked })}
         />
         <span className="settings__toggle-track" />
       </label>
@@ -83,7 +91,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
           type="checkbox"
           className="settings__checkbox"
           checked={profile.analyticsOptOut}
-          onChange={(e) => onUpdate({ analyticsOptOut: e.target.checked })}
+          onChange={(e) => updateAndTrack({ analyticsOptOut: e.target.checked })}
         />
         <span className="settings__toggle-track" />
       </label>
