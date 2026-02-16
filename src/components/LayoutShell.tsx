@@ -11,6 +11,8 @@ interface LayoutShellProps {
   profile: Profile;
   onUpdateProfile: (patch: Partial<Profile>) => void;
   onResetProfile: () => void;
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
 }
 
 export default function LayoutShell({
@@ -18,6 +20,8 @@ export default function LayoutShell({
   profile,
   onUpdateProfile,
   onResetProfile,
+  isAdmin,
+  onOpenAdmin,
 }: LayoutShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -36,6 +40,8 @@ export default function LayoutShell({
           profile={profile}
           onUpdateProfile={onUpdateProfile}
           onResetProfile={onResetProfile}
+          isAdmin={isAdmin}
+          onOpenAdmin={onOpenAdmin}
         />
       </main>
     </>

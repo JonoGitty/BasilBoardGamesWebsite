@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { WHATS_NEW_POSTS } from '../data/whatsNew';
+import { useState } from 'react';
+import { useWhatsNewFeed } from '../hooks/useWhatsNewFeed';
 import { track } from '../analytics/track';
 import WhatsNewItem from './WhatsNewItem';
 
@@ -8,13 +8,7 @@ const PREVIEW_COUNT = 3;
 export default function WhatsNew() {
   const [expanded, setExpanded] = useState(false);
 
-  const sorted = useMemo(
-    () =>
-      [...WHATS_NEW_POSTS].sort(
-        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-      ),
-    [],
-  );
+  const sorted = useWhatsNewFeed();
 
   const visible = expanded ? sorted : sorted.slice(0, PREVIEW_COUNT);
   const hasMore = sorted.length > PREVIEW_COUNT;

@@ -7,6 +7,7 @@ interface ProfileRow {
   accent_color: string;
   reduced_motion: boolean;
   analytics_opt_out: boolean;
+  role: string;
   updated_at: string;
 }
 
@@ -17,10 +18,11 @@ function toProfile(row: ProfileRow): Profile {
     accentColor: row.accent_color,
     reducedMotion: row.reduced_motion,
     analyticsOptOut: row.analytics_opt_out,
+    role: row.role === 'admin' ? 'admin' : 'user',
   };
 }
 
-function toRow(profile: Profile): Omit<ProfileRow, 'updated_at'> {
+function toRow(profile: Profile): Omit<ProfileRow, 'updated_at' | 'role'> {
   return {
     display_name: profile.nickname,
     avatar_icon: profile.avatarIcon,
@@ -35,7 +37,7 @@ export async function fetchCloudProfile(userId: string): Promise<Profile | null>
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('display_name, avatar_icon, accent_color, reduced_motion, analytics_opt_out, updated_at')
+    .select('display_name, avatar_icon, accent_color, reduced_motion, analytics_opt_out, role, updated_at')
     .eq('id', userId)
     .single();
 

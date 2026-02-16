@@ -8,6 +8,7 @@ describe('profileSync mapping', () => {
     accentColor: '#60a5fa',
     reducedMotion: true,
     analyticsOptOut: false,
+    role: 'user' as const,
   };
 
   const row = {
@@ -16,6 +17,7 @@ describe('profileSync mapping', () => {
     accent_color: '#60a5fa',
     reduced_motion: true,
     analytics_opt_out: false,
+    role: 'user',
     updated_at: '2026-01-01T00:00:00Z',
   };
 
@@ -24,7 +26,7 @@ describe('profileSync mapping', () => {
     expect(result).toEqual(profile);
   });
 
-  it('toRow maps camelCase Profile to snake_case row (without updated_at)', () => {
+  it('toRow maps camelCase Profile to snake_case row (without updated_at or role)', () => {
     const result = toRow(profile);
     expect(result).toEqual({
       display_name: 'TestPlayer',
@@ -36,7 +38,18 @@ describe('profileSync mapping', () => {
   });
 
   it('round-trips correctly', () => {
-    const roundTripped = toProfile({ ...toRow(profile), updated_at: '2026-01-01T00:00:00Z' });
+    const roundTripped = toProfile({ ...toRow(profile), role: 'user', updated_at: '2026-01-01T00:00:00Z' });
     expect(roundTripped).toEqual(profile);
+  });
+
+  it('toProfile maps admin role from row', () => {
+    const adminRow = { ...row, role: 'admin' };
+    expect(toProfile(adminRow).role).toBe('admin');
+  });
+
+  it('toRow excludes role from output', () => {
+    const adminProfile = { ...profile, role: 'admin' as const };
+    const result = toRow(adminProfile);
+    expect('role' in result).toBe(false);
   });
 });

@@ -830,3 +830,306 @@ body {
     display: none;
   }
 }
+
+/* ── Admin panel ──────────────────────────────────────── */
+.admin {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg-base);
+}
+
+.admin__header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.admin__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: var(--space-sm) 0 var(--space-md);
+}
+
+.admin__tabs {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.admin__tab {
+  padding: var(--space-sm) var(--space-lg);
+  min-height: 36px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.admin__tab:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.admin__tab--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.admin__content {
+  flex: 1;
+  padding: var(--space-lg);
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.admin__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.admin__loading,
+.admin__empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+.admin__error {
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  color: #fb7185;
+  font-size: var(--font-size-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* Game row */
+.admin__game-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.admin__game-emoji {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.admin__game-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin__game-title {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin__game-id {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.admin__game-controls {
+  display: flex;
+  gap: var(--space-lg);
+  flex-shrink: 0;
+}
+
+.admin__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.admin__toggle-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Post row */
+.admin__post-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.admin__post-emoji {
+  font-size: 1.25rem;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.admin__post-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin__post-title {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin__post-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.admin__post-date {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.admin__draft-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(107, 107, 118, 0.15);
+  color: var(--text-muted);
+}
+
+.admin__post-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.admin__action-btn {
+  min-height: 32px;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.admin__action-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.admin__action-btn--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.admin__action-btn--accent:hover {
+  background: var(--accent-hover);
+}
+
+.admin__action-btn--warn {
+  color: #fbbf24;
+}
+
+.admin__action-btn--danger {
+  color: #fb7185;
+}
+
+.admin__action-btn--danger:hover {
+  background: rgba(251, 113, 133, 0.15);
+}
+
+.admin__create-btn {
+  margin-bottom: var(--space-lg);
+}
+
+/* Post form */
+.admin__form {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.admin__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.admin__emoji-input {
+  width: 80px;
+}
+
+.admin__category-grid {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.admin__category-btn {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.admin__category-btn--active {
+  border-color: var(--text-primary);
+}
+
+.admin__form-actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+/* Responsive: stack controls on mobile */
+@media (max-width: 640px) {
+  .admin__game-row {
+    flex-wrap: wrap;
+  }
+
+  .admin__game-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin__post-row {
+    flex-wrap: wrap;
+  }
+
+  .admin__post-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

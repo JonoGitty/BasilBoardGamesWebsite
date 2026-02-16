@@ -4,6 +4,7 @@ export interface Profile {
   accentColor: string;
   reducedMotion: boolean;
   analyticsOptOut: boolean;
+  role: 'user' | 'admin';
 }
 
 export const AVATAR_ICONS = [
@@ -32,4 +33,5 @@ export const DEFAULT_PROFILE: Profile = {
   accentColor: '#7c6ff7',
   reducedMotion: false,
   analyticsOptOut: false,
+  role: 'user',
 };

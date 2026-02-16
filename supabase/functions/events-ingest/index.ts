@@ -12,6 +12,12 @@ const VALID_EVENT_NAMES = [
   "auth_sign_up",
   "auth_sign_in",
   "auth_sign_out",
+  "admin_open",
+  "admin_game_update",
+  "admin_post_create",
+  "admin_post_publish",
+  "admin_post_unpublish",
+  "admin_post_delete",
 ] as const;
 
 type EventName = (typeof VALID_EVENT_NAMES)[number];

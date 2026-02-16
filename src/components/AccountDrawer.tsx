@@ -10,6 +10,8 @@ interface AccountDrawerProps {
   profile: Profile;
   onUpdateProfile: (patch: Partial<Profile>) => void;
   onResetProfile: () => void;
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
 }
 
 type View = 'nav' | 'settings' | 'auth';
@@ -17,9 +19,13 @@ type View = 'nav' | 'settings' | 'auth';
 function AccountNav({
   profile,
   onNavigate,
+  isAdmin,
+  onOpenAdmin,
 }: {
   profile: Profile;
   onNavigate: (view: View) => void;
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
 }) {
   const { user, signOut } = useAuth();
 
@@ -42,6 +48,16 @@ function AccountNav({
       </div>
       <nav>
         <ul className="account-drawer__nav">
+          {isAdmin && (
+            <li>
+              <button className="account-drawer__link" onClick={onOpenAdmin}>
+                <span className="account-drawer__link-icon" aria-hidden="true">
+                  {'\uD83D\uDEE0\uFE0F'}
+                </span>
+                Admin
+              </button>
+            </li>
+          )}
           <li>
             <button
               className="account-drawer__link"
@@ -93,10 +109,14 @@ function DrawerContent({
   profile,
   onUpdateProfile,
   onResetProfile,
+  isAdmin,
+  onOpenAdmin,
 }: {
   profile: Profile;
   onUpdateProfile: (patch: Partial<Profile>) => void;
   onResetProfile: () => void;
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
 }) {
   const [view, setView] = useState<View>('nav');
 
@@ -115,7 +135,7 @@ function DrawerContent({
     return <AuthForm onBack={() => setView('nav')} />;
   }
 
-  return <AccountNav profile={profile} onNavigate={setView} />;
+  return <AccountNav profile={profile} onNavigate={setView} isAdmin={isAdmin} onOpenAdmin={onOpenAdmin} />;
 }
 
 export default function AccountDrawer({
@@ -124,6 +144,8 @@ export default function AccountDrawer({
   profile,
   onUpdateProfile,
   onResetProfile,
+  isAdmin,
+  onOpenAdmin,
 }: AccountDrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -151,6 +173,8 @@ export default function AccountDrawer({
           profile={profile}
           onUpdateProfile={onUpdateProfile}
           onResetProfile={onResetProfile}
+          isAdmin={isAdmin}
+          onOpenAdmin={onOpenAdmin}
         />
       </aside>
 
@@ -178,6 +202,8 @@ export default function AccountDrawer({
             profile={profile}
             onUpdateProfile={onUpdateProfile}
             onResetProfile={onResetProfile}
+            isAdmin={isAdmin}
+            onOpenAdmin={onOpenAdmin}
           />
         </div>
       </div>
