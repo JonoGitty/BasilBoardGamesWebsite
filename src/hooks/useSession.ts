@@ -1,6 +1,5 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { endSession } from '../services/sessionTracker';
-import type { SessionSummary } from '../types/session';
 
 /**
  * Manages the lifecycle of the current game session.
@@ -8,12 +7,8 @@ import type { SessionSummary } from '../types/session';
  * Returns `endCurrentSession` for explicit end-of-game.
  */
 export function useSession(gameId: string | null) {
-  const lastSummary = useRef<SessionSummary | null>(null);
-
   const endCurrentSession = useCallback(() => {
-    const summary = endSession();
-    if (summary) lastSummary.current = summary;
-    return summary;
+    return endSession();
   }, []);
 
   // Best-effort: end session on beforeunload (tab close / navigate away)
@@ -32,5 +27,5 @@ export function useSession(gameId: string | null) {
     };
   }, [gameId]);
 
-  return { endCurrentSession, lastSummary: lastSummary.current };
+  return { endCurrentSession };
 }
