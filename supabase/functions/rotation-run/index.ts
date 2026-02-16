@@ -57,10 +57,18 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // Auth: require service_role key
+  // Auth: require service_role JWT (role claim = "service_role")
   const authHeader = req.headers.get("Authorization");
-  const expected = `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`;
-  if (authHeader !== expected) {
+  if (!authHeader) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  try {
+    const token = authHeader.replace("Bearer ", "");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.role !== "service_role") {
+      return json({ error: "Forbidden: service_role required" }, 403);
+    }
+  } catch {
     return json({ error: "Unauthorized" }, 401);
   }
 
