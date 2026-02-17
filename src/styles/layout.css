@@ -1635,3 +1635,21 @@ body {
   color: #fb7185;
   margin-bottom: var(--space-md);
 }
+
+.settings__input--error {
+  border-color: #fb7185;
+}
+
+.settings__field-error {
+  font-size: var(--font-size-sm);
+  color: #fb7185;
+  margin-top: var(--space-xs);
+  display: block;
+}
+
+.settings__field-hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+  display: block;
+}

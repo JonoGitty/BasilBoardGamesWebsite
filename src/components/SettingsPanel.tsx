@@ -1,21 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Profile } from '../types/profile';
 import { AVATAR_ICONS, ACCENT_COLORS } from '../types/profile';
 import { track } from '../analytics/track';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
+import { normalizeNickname, validateNickname } from '../utils/nickname';
+import { useNicknameCheck } from '../hooks/useNicknameCheck';
 
 interface SettingsPanelProps {
   profile: Profile;
   onUpdate: (patch: Partial<Profile>) => void;
   onReset: () => void;
   onBack: () => void;
+  isAdmin: boolean;
 }
 
-export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: SettingsPanelProps) {
+export default function SettingsPanel({ profile, onUpdate, onReset, onBack, isAdmin }: SettingsPanelProps) {
   const { user, signOut } = useAuth();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [draftNickname, setDraftNickname] = useState(profile.nickname);
+
+  // Sync draft when profile changes externally (e.g. cloud sync)
+  useEffect(() => { setDraftNickname(profile.nickname); }, [profile.nickname]);
+
+  const nicknameError = validateNickname(draftNickname, isAdmin);
+  const { checking, taken } = useNicknameCheck(draftNickname, profile.nickname);
+  const canSaveNickname = !nicknameError && !taken && !checking;
+
+  const commitNickname = () => {
+    const normalized = normalizeNickname(draftNickname);
+    if (canSaveNickname && normalized !== profile.nickname && normalized !== '') {
+      updateAndTrack({ nickname: normalized });
+    } else if (!canSaveNickname) {
+      // Revert to saved value on invalid input
+      setDraftNickname(profile.nickname);
+    }
+  };
 
   const handleExport = () => {
     const data = {
@@ -77,12 +98,19 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
       <label className="settings__field">
         <span className="settings__label">Nickname</span>
         <input
-          className="settings__input"
+          className={`settings__input${nicknameError || taken ? ' settings__input--error' : ''}`}
           type="text"
-          value={profile.nickname}
+          value={draftNickname}
           maxLength={20}
-          onChange={(e) => updateAndTrack({ nickname: e.target.value })}
+          onChange={(e) => setDraftNickname(e.target.value)}
+          onBlur={commitNickname}
+          onKeyDown={(e) => { if (e.key === 'Enter') commitNickname(); }}
         />
+        {nicknameError && <span className="settings__field-error">{nicknameError}</span>}
+        {!nicknameError && checking && <span className="settings__field-hint">Checking availability...</span>}
+        {!nicknameError && !checking && taken && (
+          <span className="settings__field-error">This nickname is already taken</span>
+        )}
       </label>
 
       <fieldset className="settings__field settings__fieldset">

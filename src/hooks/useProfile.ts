@@ -39,7 +39,14 @@ export function useProfile() {
     (patch: Partial<Profile>) => {
       setProfile((prev) => {
         const next = { ...prev, ...patch };
-        if (user) upsertCloudProfile(user.id, next);
+        if (user) {
+          upsertCloudProfile(user.id, next).then((result) => {
+            if (!result.ok) {
+              // Revert on constraint violation (e.g. duplicate nickname, crown restriction)
+              setProfile(prev);
+            }
+          });
+        }
         return next;
       });
     },

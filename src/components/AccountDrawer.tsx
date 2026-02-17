@@ -153,6 +153,7 @@ function DrawerContent({
         onUpdate={onUpdateProfile}
         onReset={onResetProfile}
         onBack={() => setView('nav')}
+        isAdmin={isAdmin}
       />
     );
   }

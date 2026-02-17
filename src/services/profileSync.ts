@@ -26,7 +26,7 @@ function toProfile(row: ProfileRow): Profile {
 
 function toRow(profile: Profile): Omit<ProfileRow, 'updated_at' | 'role'> {
   return {
-    display_name: profile.nickname,
+    display_name: profile.nickname.trim().replace(/\s+/g, ' '),
     avatar_icon: profile.avatarIcon,
     accent_color: profile.accentColor,
     reduced_motion: profile.reducedMotion,
@@ -48,12 +48,18 @@ export async function fetchCloudProfile(userId: string): Promise<Profile | null>
   return toProfile(data as ProfileRow);
 }
 
-export async function upsertCloudProfile(userId: string, profile: Profile): Promise<void> {
-  if (!supabase) return;
+export async function upsertCloudProfile(
+  userId: string,
+  profile: Profile,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: true };
 
-  await supabase
+  const { error } = await supabase
     .from('profiles')
     .upsert({ id: userId, ...toRow(profile), updated_at: new Date().toISOString() });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }
 
 // Exported for testing
