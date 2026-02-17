@@ -14,7 +14,7 @@ export function useNicknameCheck(
 ): { checking: boolean; taken: boolean } {
   const [checking, setChecking] = useState(false);
   const [taken, setTaken] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const canonical = canonicalizeNickname(draft);
