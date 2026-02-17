@@ -980,6 +980,31 @@ body {
   white-space: nowrap;
 }
 
+.admin__toggle-hint {
+  font-size: var(--font-size-xs, 0.7rem);
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.admin__save-indicator {
+  font-size: var(--font-size-xs, 0.7rem);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.admin__save-indicator--saving {
+  color: var(--text-muted);
+}
+
+.admin__save-indicator--saved {
+  color: #22c55e;
+}
+
+.admin__save-indicator--error {
+  color: #ef4444;
+}
+
 .admin__inline-field {
   display: flex;
   align-items: center;

@@ -3,7 +3,7 @@ import { fetchAllGames, updateGame, setActiveLineup as apiSetActiveLineup } from
 import type { AdminGameRow, GameUpdatePayload } from '../types/admin';
 
 /** Fields tracked for dirty detection (lineup bar). */
-const LINEUP_FIELDS: (keyof AdminGameRow)[] = ['vault', 'enabled'];
+const LINEUP_FIELDS: (keyof AdminGameRow)[] = ['vault'];
 
 export function useAdminGames() {
   const [games, setGames] = useState<AdminGameRow[]>([]);
