@@ -12,13 +12,13 @@ export default function AboutPage({ onBack }: AboutPageProps) {
           </svg>
           Back
         </button>
-        <h1 className="privacy__title">About Basil Games</h1>
+        <h1 className="privacy__title">About Basil Board Games</h1>
       </header>
 
       <div className="privacy__content">
         <section className="privacy__section">
           <p>
-            Basil Games is a social game laboratory.
+            Basil Board Games is a social game laboratory.
             We build small, fast, playful web games &mdash; then we test what actually
             works with real players.
           </p>
@@ -78,7 +78,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
           </p>
           <p>
             Got feedback or want to help test?<br />
-            Email: <strong>hello@basilgames.co.uk</strong>
+            Email: <strong>hello@basilboardgames.co.uk</strong>
           </p>
         </section>
       </div>
