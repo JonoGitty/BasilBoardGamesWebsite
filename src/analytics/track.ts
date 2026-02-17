@@ -1,6 +1,7 @@
 import type { EventMap, EventName, TelemetryEvent } from './schema';
 import { enqueue, drain, size } from './queue';
 import { sendEvents } from './transport';
+import { hasAnalyticsConsent } from '../lib/consent';
 
 const PROFILE_KEY = 'basil_profile';
 const FLUSH_INTERVAL_MS = 30_000;
@@ -30,7 +31,7 @@ export function track<K extends EventName>(
   name: K,
   payload: EventMap[K],
 ): void {
-  if (isOptedOut()) return;
+  if (!hasAnalyticsConsent() || isOptedOut()) return;
 
   const event: TelemetryEvent<K> = {
     id: crypto.randomUUID(),

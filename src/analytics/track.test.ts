@@ -3,6 +3,8 @@ import { track, flushEvents, queueSize } from './track';
 
 beforeEach(() => {
   localStorage.clear();
+  // Grant analytics consent so track() doesn't early-return
+  localStorage.setItem('basil_consent', 'all');
   // Drain any leftover events
   flushEvents();
 });

@@ -8,8 +8,10 @@ import { track, initTransport } from './analytics/track';
 import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
 import AdminPanel from './components/AdminPanel';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import ConsentBanner from './components/ConsentBanner';
 
-type AppView = 'home' | 'game' | 'admin';
+type AppView = 'home' | 'game' | 'admin' | 'privacy';
 
 function AppContent() {
   const [view, setView] = useState<AppView>('home');
@@ -44,6 +46,18 @@ function AppContent() {
     setView('home');
   }, []);
 
+  const handleOpenPrivacy = useCallback(() => {
+    setView('privacy');
+  }, []);
+
+  const handleClosePrivacy = useCallback(() => {
+    setView('home');
+  }, []);
+
+  if (view === 'privacy') {
+    return <PrivacyPolicy onBack={handleClosePrivacy} />;
+  }
+
   if (view === 'game' && activeGame) {
     return <GameLaunch game={activeGame} onExit={handleExit} />;
   }
@@ -53,14 +67,18 @@ function AppContent() {
   }
 
   return (
-    <LayoutShell
-      onLaunchGame={handleLaunch}
-      profile={profile}
-      onUpdateProfile={update}
-      onResetProfile={reset}
-      isAdmin={isAdmin}
-      onOpenAdmin={handleOpenAdmin}
-    />
+    <>
+      <LayoutShell
+        onLaunchGame={handleLaunch}
+        profile={profile}
+        onUpdateProfile={update}
+        onResetProfile={reset}
+        isAdmin={isAdmin}
+        onOpenAdmin={handleOpenAdmin}
+        onOpenPrivacy={handleOpenPrivacy}
+      />
+      <ConsentBanner onOpenPrivacy={handleOpenPrivacy} />
+    </>
   );
 }
 

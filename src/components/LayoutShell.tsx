@@ -5,6 +5,7 @@ import TopBar from './TopBar';
 import WhatsNew from './WhatsNew';
 import GameCarousel from './GameCarousel';
 import AccountDrawer from './AccountDrawer';
+import Footer from './Footer';
 
 interface LayoutShellProps {
   onLaunchGame: (game: Game) => void;
@@ -13,6 +14,7 @@ interface LayoutShellProps {
   onResetProfile: () => void;
   isAdmin: boolean;
   onOpenAdmin: () => void;
+  onOpenPrivacy: () => void;
 }
 
 export default function LayoutShell({
@@ -22,6 +24,7 @@ export default function LayoutShell({
   onResetProfile,
   isAdmin,
   onOpenAdmin,
+  onOpenPrivacy,
 }: LayoutShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -42,8 +45,10 @@ export default function LayoutShell({
           onResetProfile={onResetProfile}
           isAdmin={isAdmin}
           onOpenAdmin={onOpenAdmin}
+          onOpenPrivacy={onOpenPrivacy}
         />
       </main>
+      <Footer onOpenPrivacy={onOpenPrivacy} />
     </>
   );
 }

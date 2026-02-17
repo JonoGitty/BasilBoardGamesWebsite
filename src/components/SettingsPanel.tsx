@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import type { Profile } from '../types/profile';
 import { AVATAR_ICONS, ACCENT_COLORS } from '../types/profile';
 import { track } from '../analytics/track';
+import { useAuth } from '../auth/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface SettingsPanelProps {
   profile: Profile;
@@ -10,6 +13,49 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: SettingsPanelProps) {
+  const { user, signOut } = useAuth();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleExport = () => {
+    const data = {
+      profile: {
+        nickname: profile.nickname,
+        avatarIcon: profile.avatarIcon,
+        accentColor: profile.accentColor,
+        reducedMotion: profile.reducedMotion,
+        analyticsOptOut: profile.analyticsOptOut,
+      },
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'basil-board-games-data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    track('settings_change', { field: 'data_export' });
+  };
+
+  const handleDeleteRequest = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    if (!supabase) {
+      setDeleteError('Service unavailable');
+      return;
+    }
+    const { error } = await supabase.rpc('request_account_deletion');
+    if (error) {
+      setDeleteError(error.message);
+      return;
+    }
+    track('settings_change', { field: 'account_deletion_requested' });
+    await signOut();
+  };
+
   const updateAndTrack = (patch: Partial<Profile>) => {
     onUpdate(patch);
     for (const field of Object.keys(patch)) {
@@ -99,6 +145,37 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack }: Se
       <button className="settings__reset" onClick={onReset}>
         Reset to defaults
       </button>
+
+      {user && (
+        <>
+          <h3 className="settings__heading">Your Data</h3>
+
+          <button className="settings__export-btn" onClick={handleExport} type="button">
+            Export My Data
+          </button>
+          <p className="settings__hint">
+            Downloads a JSON file of your profile data.
+          </p>
+
+          <h3 className="settings__heading settings__heading--danger">Danger Zone</h3>
+
+          {deleteError && <p className="settings__error">{deleteError}</p>}
+
+          <button
+            className="settings__delete-btn"
+            onClick={handleDeleteRequest}
+            type="button"
+          >
+            {confirmDelete ? 'Confirm: Delete My Account' : 'Delete My Account'}
+          </button>
+          {confirmDelete && (
+            <p className="settings__hint settings__hint--danger">
+              This will schedule your account for permanent deletion within 30 days.
+              You will be signed out immediately.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
