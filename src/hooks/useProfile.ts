@@ -71,8 +71,9 @@ export function useProfile() {
 
   // Apply dashboard-wide theme
   useEffect(() => {
-    if (profile.launcherStyle === 'craft-desk') {
-      document.documentElement.setAttribute('data-theme', 'craft-desk');
+    const dashboardThemes = ['craft-desk', 'nebula'];
+    if (dashboardThemes.includes(profile.launcherStyle)) {
+      document.documentElement.setAttribute('data-theme', profile.launcherStyle);
     } else {
       document.documentElement.removeAttribute('data-theme');
     }

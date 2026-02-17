@@ -22,7 +22,7 @@ function ThemedLauncher({
   theme,
   onLaunch,
 }: {
-  theme: 'craft-desk' | 'netflix';
+  theme: 'craft-desk' | 'netflix' | 'nebula';
   onLaunch: (game: Game) => void;
 }) {
   const games = useFeaturedGames();

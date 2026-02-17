@@ -1,7 +1,8 @@
-export type LauncherStyle = 'classic' | 'craft-desk' | 'netflix';
+export type LauncherStyle = 'classic' | 'craft-desk' | 'netflix' | 'nebula';
 
 export const LAUNCHER_STYLES: { label: string; value: LauncherStyle }[] = [
   { label: 'Craft Desk', value: 'craft-desk' },
+  { label: 'Nebula Tiles', value: 'nebula' },
   { label: 'Netflix Tiles', value: 'netflix' },
   { label: 'Classic (Fanned Cards)', value: 'classic' },
 ];

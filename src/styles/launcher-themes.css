@@ -276,6 +276,100 @@
   }
 }
 
+/* ── Nebula Tiles theme ─────────────────────────────── */
+
+[data-launcher-theme="nebula"] {
+  --nebula-border: rgba(100, 80, 200, 0.2);
+  --nebula-border-hover: rgba(120, 100, 240, 0.4);
+  --nebula-shadow: 0 2px 12px rgba(100, 80, 200, 0.12);
+  --nebula-shadow-hover: 0 4px 24px rgba(100, 80, 200, 0.25), 0 0 40px rgba(100, 80, 200, 0.1);
+  --nebula-focus-glow: rgba(120, 100, 240, 0.5);
+  --nebula-label-bg: rgba(11, 13, 26, 0.7);
+  --nebula-label-text: #c8ccf0;
+  --nebula-badge-bg: rgba(120, 100, 240, 0.8);
+  --nebula-card-bg: rgba(26, 30, 53, 0.6);
+  --nebula-card-bg-hover: rgba(34, 40, 68, 0.7);
+
+  background: transparent;
+  border: none;
+  padding: var(--space-xl) var(--space-lg);
+}
+
+/* Card — glassy dark panel */
+[data-launcher-theme="nebula"] .launcher__card {
+  background: var(--nebula-card-bg);
+  border: 1px solid var(--nebula-border);
+  border-radius: 16px;
+  box-shadow: var(--nebula-shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  min-height: 140px;
+  transition:
+    transform var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out),
+    background var(--duration-normal) var(--ease-out);
+}
+
+/* Hover — scale + intensified glow */
+[data-launcher-theme="nebula"] .launcher__card:hover {
+  transform: scale(1.04);
+  background: var(--nebula-card-bg-hover);
+  border-color: var(--nebula-border-hover);
+  box-shadow: var(--nebula-shadow-hover);
+  outline: none;
+}
+
+/* Focus-visible — bright accent glow ring */
+[data-launcher-theme="nebula"] .launcher__card:focus-visible {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 3px var(--nebula-focus-glow);
+  outline: none;
+}
+
+/* Active/press — snappy press */
+[data-launcher-theme="nebula"] .launcher__card:active {
+  transform: scale(0.98);
+  transition-duration: 80ms;
+}
+
+[data-launcher-theme="nebula"] .launcher__label {
+  color: var(--nebula-label-text);
+  background: var(--nebula-label-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-sm);
+}
+
+[data-launcher-theme="nebula"] .launcher__badge {
+  background: var(--nebula-badge-bg);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(120, 100, 240, 0.3);
+}
+
+/* ── Mobile: nebula adjustments ──────────────────────── */
+
+@media (max-width: 1023px) {
+  [data-launcher-theme="nebula"] {
+    padding: var(--space-md);
+  }
+
+  [data-launcher-theme="nebula"] .launcher__card {
+    padding: var(--space-md) var(--space-sm);
+    min-height: 120px;
+  }
+}
+
+/* ── Desktop: nebula 4-column grid ───────────────────── */
+
+@media (min-width: 1024px) {
+  [data-launcher-theme="nebula"] {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 /* ── Reduced motion ───────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
