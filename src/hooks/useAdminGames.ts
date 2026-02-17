@@ -14,9 +14,9 @@ export function useAdminGames() {
   /** Snapshot of state from last server fetch, for dirty detection. */
   const [serverGames, setServerGames] = useState<AdminGameRow[]>([]);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (preserveError = false) => {
     setLoading(true);
-    setError(null);
+    if (!preserveError) setError(null);
     const result = await fetchAllGames();
     if (result.error) setError(result.error);
     setGames(result.data);
@@ -67,8 +67,8 @@ export function useAdminGames() {
 
       const result = await updateGame(gameId, payload);
       if (!result.ok) {
+        await refresh(true);
         setError(result.error ?? 'Update failed');
-        await refresh();
       } else {
         // Sync server snapshot for the updated game
         setServerGames((prev) =>
@@ -92,8 +92,8 @@ export function useAdminGames() {
     setError(null);
     const result = await apiSetActiveLineup(activeIds);
     if (!result.ok) {
+      await refresh(true);
       setError(result.error ?? 'Failed to apply lineup');
-      await refresh();
     } else {
       setServerGames(games);
     }
