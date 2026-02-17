@@ -41,7 +41,10 @@ async function invokeAdminCommand<TResult>(
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    // Supabase FunctionsHttpError stores the response body in error.context
+    const ctx = (error as { context?: { error?: string } }).context;
+    const detail = ctx?.error ?? error.message;
+    return { ok: false, error: detail };
   }
 
   if (!data || typeof data !== 'object') {
