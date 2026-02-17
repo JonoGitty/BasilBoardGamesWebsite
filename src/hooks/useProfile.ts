@@ -62,5 +62,14 @@ export function useProfile() {
     document.documentElement.classList.toggle('reduce-motion', profile.reducedMotion);
   }, [profile.reducedMotion]);
 
+  // Apply dashboard-wide theme
+  useEffect(() => {
+    if (profile.launcherStyle === 'craft-desk') {
+      document.documentElement.setAttribute('data-theme', 'craft-desk');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [profile.launcherStyle]);
+
   return { profile, update, reset };
 }

@@ -1,0 +1,198 @@
+/* ── Dashboard-wide Craft Desk theme ──────────────────── */
+/* Active when html[data-theme="craft-desk"] is set by useProfile */
+
+/* ── 3a. Token overrides ─────────────────────────────── */
+
+[data-theme="craft-desk"] {
+  --bg-base: #d4c4a8;
+  --bg-surface: #e8dcc8;
+  --bg-card: #f2e8d8;
+  --bg-card-hover: #e0d2bc;
+  --text-primary: #3a2a18;
+  --text-secondary: #6b5840;
+  --text-muted: #9a876c;
+  --border: #b89e78;
+  --shadow-card: 0 2px 8px rgba(90, 60, 20, 0.15);
+  --shadow-elevated: 0 8px 24px rgba(90, 60, 20, 0.25);
+}
+
+/* ── 3b. Page background texture ─────────────────────── */
+
+html[data-theme="craft-desk"] {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E") repeat,
+    #d4c4a8;
+}
+
+/* ── 3c. Top bar ─────────────────────────────────────── */
+
+[data-theme="craft-desk"] .top-bar {
+  border-bottom: 2px dashed var(--border);
+  box-shadow: 0 1px 4px rgba(90, 60, 20, 0.1);
+}
+
+/* ── 3d. What's New — dashed borders, tape, paper grain  */
+
+[data-theme="craft-desk"] .whats-new {
+  border: 2px dashed var(--border);
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+/* Tape strip — top-left */
+[data-theme="craft-desk"] .whats-new::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 24px;
+  width: 52px;
+  height: 16px;
+  background: rgba(255, 235, 180, 0.7);
+  border: 1px solid rgba(200, 180, 130, 0.4);
+  border-radius: 2px;
+  transform: rotate(-3deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Paper grain overlay */
+[data-theme="craft-desk"] .whats-new::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E") repeat;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+/* Dashed item dividers */
+[data-theme="craft-desk"] .whats-new__item {
+  border-bottom: 1px dashed var(--border);
+}
+
+[data-theme="craft-desk"] .whats-new__item:last-child {
+  border-bottom: none;
+}
+
+/* Dashed toggle button border */
+[data-theme="craft-desk"] .whats-new__toggle {
+  border: 1px dashed var(--border);
+}
+
+/* ── 3e. What's New badges — light-safe colors ───────── */
+
+[data-theme="craft-desk"] .whats-new__badge--patch {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+[data-theme="craft-desk"] .whats-new__badge--experiment {
+  background: rgba(180, 130, 20, 0.15);
+  color: #92600a;
+}
+
+[data-theme="craft-desk"] .whats-new__badge--announcement {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+/* ── 3f. Account drawer — dashed border + pushpin ────── */
+
+[data-theme="craft-desk"] .account-drawer {
+  border: 2px dashed var(--border);
+  position: relative;
+}
+
+[data-theme="craft-desk"] .account-drawer::before {
+  content: '\1F4CC';
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  font-size: 1.25rem;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── 3g. Mobile drawer ───────────────────────────────── */
+
+[data-theme="craft-desk"] .drawer-panel {
+  border-left: 2px dashed var(--border);
+}
+
+[data-theme="craft-desk"] .drawer-overlay--open {
+  background: rgba(80, 60, 30, 0.35);
+}
+
+/* ── 3h. Footer — dashed top border ──────────────────── */
+
+[data-theme="craft-desk"] .site-footer {
+  border-top: 2px dashed var(--border);
+}
+
+/* ── 3i. Consent banner — warm shadow + dashed border ── */
+
+[data-theme="craft-desk"] .consent-banner {
+  border-top: 2px dashed var(--border);
+  box-shadow: 0 -4px 16px rgba(90, 60, 20, 0.2);
+}
+
+/* ── 3j. Hardcoded color fixes ───────────────────────── */
+
+/* Danger: #fb7185 is low contrast on cream → #be123c */
+[data-theme="craft-desk"] .auth-form__error,
+[data-theme="craft-desk"] .settings__hint--danger,
+[data-theme="craft-desk"] .settings__heading--danger,
+[data-theme="craft-desk"] .settings__error,
+[data-theme="craft-desk"] .admin__action-btn--danger,
+[data-theme="craft-desk"] .admin__error {
+  color: #be123c;
+}
+
+[data-theme="craft-desk"] .settings__delete-btn {
+  color: #be123c;
+  border-color: #be123c;
+}
+
+[data-theme="craft-desk"] .settings__delete-btn:hover {
+  background: rgba(190, 18, 60, 0.1);
+}
+
+[data-theme="craft-desk"] .admin__action-btn--danger:hover {
+  background: rgba(190, 18, 60, 0.1);
+}
+
+[data-theme="craft-desk"] .admin__error {
+  background: rgba(190, 18, 60, 0.08);
+  border-color: rgba(190, 18, 60, 0.25);
+}
+
+/* Success: #34d399 → #15803d */
+[data-theme="craft-desk"] .auth-form__info {
+  color: #15803d;
+}
+
+/* Warning: #fbbf24 → #92400e */
+[data-theme="craft-desk"] .admin__action-btn--warn {
+  color: #92400e;
+}
+
+[data-theme="craft-desk"] .admin__lineup-hint {
+  color: #92400e;
+}
+
+/* ── 3k. Launcher refinements — warm shadows ─────────── */
+
+[data-theme="craft-desk"] [data-launcher-theme="craft-desk"] {
+  --craft-shadow: 2px 3px 8px rgba(80, 50, 15, 0.2);
+  --craft-shadow-hover: 3px 5px 14px rgba(80, 50, 15, 0.3);
+}
+
+/* ── 3l. Mobile — hide decorations ───────────────────── */
+
+@media (max-width: 1023px) {
+  [data-theme="craft-desk"] .whats-new::before,
+  [data-theme="craft-desk"] .account-drawer::before {
+    display: none;
+  }
+}
