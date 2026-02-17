@@ -132,7 +132,7 @@ function DrawerContent({
   }
 
   if (view === 'auth') {
-    return <AuthForm onBack={() => setView('nav')} />;
+    return <AuthForm onBack={() => setView('nav')} onSignedIn={() => setView('nav')} />;
   }
 
   return <AccountNav profile={profile} onNavigate={setView} isAdmin={isAdmin} onOpenAdmin={onOpenAdmin} />;

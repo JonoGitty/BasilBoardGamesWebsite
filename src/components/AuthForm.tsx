@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 
 type Mode = 'sign-in' | 'sign-up';
 
-export default function AuthForm({ onBack }: { onBack: () => void }) {
+export default function AuthForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn?: () => void }) {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
@@ -27,7 +27,9 @@ export default function AuthForm({ onBack }: { onBack: () => void }) {
 
     if (result.error) {
       setError(result.error);
-    } else if (mode === 'sign-up' && 'confirmationSent' in result && result.confirmationSent) {
+    } else if (mode === 'sign-in') {
+      onSignedIn?.();
+    } else if ('confirmationSent' in result && result.confirmationSent) {
       setInfo('Check your email to confirm your account.');
       setMode('sign-in');
     }
