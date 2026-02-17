@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
 import { useAdminPosts } from '../hooks/useAdminPosts';
 import { track } from '../analytics/track';
 import { formatShortDate } from '../utils/date';
@@ -150,13 +149,12 @@ function PostRow({
 }
 
 export default function AdminPostsTab() {
-  const { user } = useAuth();
   const { posts, loading, error, create, update, publish, unpublish, remove } = useAdminPosts();
   const [editing, setEditing] = useState<AdminPost | 'new' | null>(null);
 
   const handleSave = async (payload: PostPayload) => {
     if (editing === 'new') {
-      const result = await create(payload, user!.id);
+      const result = await create(payload);
       if (result.ok) {
         track('admin_post_create', { postId: payload.id });
         setEditing(null);

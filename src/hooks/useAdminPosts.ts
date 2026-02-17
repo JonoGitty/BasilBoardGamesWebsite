@@ -35,9 +35,9 @@ export function useAdminPosts() {
   }, []);
 
   const create = useCallback(
-    async (payload: PostPayload, userId: string) => {
+    async (payload: PostPayload) => {
       setError(null);
-      const result = await createPost(payload, userId);
+      const result = await createPost(payload);
       if (!result.ok) {
         setError(result.error ?? 'Create failed');
       } else {

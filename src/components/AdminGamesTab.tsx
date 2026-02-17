@@ -45,19 +45,24 @@ function GameRow({
 }
 
 export default function AdminGamesTab() {
-  const { games, loading, error, update } = useAdminGames();
+  const { games, loading, saving, error, lineupDirty, toggleLocal, update, applyLineup } = useAdminGames();
 
-  const handleToggleVault = async (id: string, vault: boolean) => {
-    const result = await update(id, { vault });
-    if (result.ok) {
-      track('admin_game_update', { gameId: id, fields: ['vault'] });
-    }
+  const handleToggleVault = (id: string, vault: boolean) => {
+    toggleLocal(id, 'vault', vault);
   };
 
   const handleTogglePin = async (id: string, pinned: boolean) => {
     const result = await update(id, { pinned });
     if (result.ok) {
       track('admin_game_update', { gameId: id, fields: ['pinned'] });
+    }
+  };
+
+  const handleApplyLineup = async () => {
+    const result = await applyLineup();
+    if (result.ok) {
+      const activeIds = games.filter((g) => !g.vault).map((g) => g.id);
+      track('admin_game_update', { gameId: activeIds.join(','), fields: ['lineup'] });
     }
   };
 
@@ -78,6 +83,21 @@ export default function AdminGamesTab() {
           />
         ))}
       </div>
+      {lineupDirty && (
+        <div className="admin__lineup-bar">
+          <button
+            className="admin__action-btn admin__action-btn--primary"
+            onClick={handleApplyLineup}
+            disabled={saving}
+            type="button"
+          >
+            {saving ? 'Applying...' : 'Apply Active Lineup'}
+          </button>
+          <span className="admin__lineup-hint">
+            Unsaved lineup changes
+          </span>
+        </div>
+      )}
     </div>
   );
 }

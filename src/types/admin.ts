@@ -46,3 +46,12 @@ export interface PostPayload {
   emoji: string;
   category: PostCategory;
 }
+
+/** Deterministic backend command names for admin operations. */
+export type AdminCommandName =
+  | 'games.patch'
+  | 'games.set_active_lineup'
+  | 'posts.upsert_draft'
+  | 'posts.patch'
+  | 'posts.set_published'
+  | 'posts.delete';

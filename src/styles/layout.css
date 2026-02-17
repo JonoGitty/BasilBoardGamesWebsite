@@ -1077,6 +1077,40 @@ body {
   background: rgba(251, 113, 133, 0.15);
 }
 
+.admin__action-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin__action-btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.admin__action-btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin__lineup-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-md);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.admin__lineup-hint {
+  font-size: var(--font-size-sm);
+  color: #fbbf24;
+}
+
 .admin__create-btn {
   margin-bottom: var(--space-lg);
 }

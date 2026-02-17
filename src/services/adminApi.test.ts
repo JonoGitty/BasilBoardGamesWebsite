@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toAdminPost } from './adminApi';
+import { toAdminPost, updateGame, setActiveLineup } from './adminApi';
 
 describe('adminApi mapping', () => {
   it('maps a published PostRow to AdminPost', () => {
@@ -49,5 +49,19 @@ describe('adminApi mapping', () => {
     expect(post.published).toBe(false);
     expect(post.publishedAt).toBeNull();
     expect(post.createdBy).toBeNull();
+  });
+});
+
+describe('adminApi client-side validation', () => {
+  it('updateGame rejects empty payload', async () => {
+    const result = await updateGame('some-game', {});
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('No changes provided');
+  });
+
+  it('setActiveLineup rejects empty array', async () => {
+    const result = await setActiveLineup([]);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('At least one game is required');
   });
 });

@@ -28,13 +28,22 @@ Trigger via GitHub Actions UI: **Actions > Deploy to GitHub Pages > Run workflow
 ## Supabase Migrations
 
 ```bash
-# Apply pending migrations
+# Apply pending migrations (includes 008-010: account deletion, admin-only commands, audit log)
 supabase db push
 
 # Deploy updated edge functions
 supabase functions deploy events-ingest --no-verify-jwt
 supabase functions deploy rotation-run --no-verify-jwt
+supabase functions deploy admin-command --no-verify-jwt
 ```
+
+### Migration Inventory
+
+| File | Purpose |
+|------|---------|
+| `008_account_deletion.sql` | Adds `deletion_requested_at` to profiles, `request_account_deletion()` RPC |
+| `009_admin_commands_only.sql` | Drops direct admin-write RLS policies on games/posts tables |
+| `010_admin_command_audit.sql` | Creates `admin_command_log` table with indexes and RLS |
 
 ## GitHub Pages Setup
 
@@ -74,6 +83,18 @@ npm run elam:check
 **Optional override:** Set `VITE_ELAM_URL` GitHub secret to point to a different URL.
 
 See `docs/elam-service-runbook.md` and `docs/elam-integration-audit.md` for details.
+
+## Admin Command Backend
+
+Admin writes are executed via deterministic backend commands in the
+`admin-command` edge function.
+
+- Commands are admin-only and require a signed-in user with `profiles.role = 'admin'`
+- The frontend admin UI sends command payloads instead of direct table writes
+- Every command is audit-logged to `admin_command_log` (success and failure)
+- This creates a stable integration surface for future automation/agent workflows
+
+See `docs/admin-command-api.md` for the command contract and `docs/admin-ops.md` for CLI usage.
 
 ## Environment Notes
 
