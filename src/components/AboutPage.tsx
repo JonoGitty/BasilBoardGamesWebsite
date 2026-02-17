@@ -46,7 +46,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
             <li>Instant to start</li>
             <li>Designed for groups</li>
             <li>Easy to share</li>
-            <li>Great for Discord calls and friend servers</li>
+            <li>Great for Discord calls, friend servers, or playing locally in real life</li>
             <li>Always evolving</li>
           </ul>
         </section>
@@ -55,6 +55,8 @@ export default function AboutPage({ onBack }: AboutPageProps) {
           <h2>How the platform works</h2>
           <p>
             Basil always shows a limited set of games at a time &mdash; usually 5&ndash;6.
+            We&rsquo;re trialling all sorts of games: classic board games, card and party
+            games, educational games, modern strategy games, and everything in between.
           </p>
           <p>Games are organised into:</p>
           <ul>
