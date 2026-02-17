@@ -2,7 +2,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // --- Constants ---
-const TARGET_ACTIVE = 6;
+const TARGET_ACTIVE = 4;
 const COOLDOWN_DAYS = 14;
 
 // --- Seeded PRNG (Mulberry32) — duplicated from src/utils/seededRandom.ts ---

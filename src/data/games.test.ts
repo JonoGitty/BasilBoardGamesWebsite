@@ -1,10 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { GAMES } from './games';
 
+const REQUIRED_IDS = ['elam', 'interrogate', 'almost', 'sidequests'];
+
 describe('games manifest', () => {
-  it('has at least 4 active games', () => {
+  it('has exactly 4 active games', () => {
     const active = GAMES.filter((g) => g.status === 'active');
-    expect(active.length).toBeGreaterThanOrEqual(4);
+    expect(active).toHaveLength(4);
+  });
+
+  it('active IDs match the approved lineup in exact order', () => {
+    const activeIds = GAMES.filter((g) => g.status === 'active').map((g) => g.id);
+    expect(activeIds).toEqual(REQUIRED_IDS);
+  });
+
+  it('interrogate has a url pointing to the static bundle', () => {
+    const interrogate = GAMES.find((g) => g.id === 'interrogate');
+    expect(interrogate).toBeDefined();
+    expect(interrogate!.url).toContain('games/interrogate/index.html');
   });
 
   it('all games have required fields', () => {
