@@ -13,6 +13,7 @@ interface AccountDrawerProps {
   isAdmin: boolean;
   onOpenAdmin: () => void;
   onOpenPrivacy: () => void;
+  onOpenAbout: () => void;
 }
 
 type View = 'nav' | 'settings' | 'auth';
@@ -23,12 +24,14 @@ function AccountNav({
   isAdmin,
   onOpenAdmin,
   onOpenPrivacy,
+  onOpenAbout,
 }: {
   profile: Profile;
   onNavigate: (view: View) => void;
   isAdmin: boolean;
   onOpenAdmin: () => void;
   onOpenPrivacy: () => void;
+  onOpenAbout: () => void;
 }) {
   const { user, signOut } = useAuth();
 
@@ -88,6 +91,14 @@ function AccountNav({
               Privacy Policy
             </button>
           </li>
+          <li>
+            <button className="account-drawer__link" onClick={onOpenAbout}>
+              <span className="account-drawer__link-icon" aria-hidden="true">
+                {'\u2139\uFE0F'}
+              </span>
+              About
+            </button>
+          </li>
           {user ? (
             <li>
               <button className="account-drawer__link" onClick={signOut}>
@@ -123,6 +134,7 @@ function DrawerContent({
   isAdmin,
   onOpenAdmin,
   onOpenPrivacy,
+  onOpenAbout,
 }: {
   profile: Profile;
   onUpdateProfile: (patch: Partial<Profile>) => void;
@@ -130,6 +142,7 @@ function DrawerContent({
   isAdmin: boolean;
   onOpenAdmin: () => void;
   onOpenPrivacy: () => void;
+  onOpenAbout: () => void;
 }) {
   const [view, setView] = useState<View>('nav');
 
@@ -148,7 +161,7 @@ function DrawerContent({
     return <AuthForm onBack={() => setView('nav')} onSignedIn={() => setView('nav')} />;
   }
 
-  return <AccountNav profile={profile} onNavigate={setView} isAdmin={isAdmin} onOpenAdmin={onOpenAdmin} onOpenPrivacy={onOpenPrivacy} />;
+  return <AccountNav profile={profile} onNavigate={setView} isAdmin={isAdmin} onOpenAdmin={onOpenAdmin} onOpenPrivacy={onOpenPrivacy} onOpenAbout={onOpenAbout} />;
 }
 
 export default function AccountDrawer({
@@ -160,6 +173,7 @@ export default function AccountDrawer({
   isAdmin,
   onOpenAdmin,
   onOpenPrivacy,
+  onOpenAbout,
 }: AccountDrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -190,6 +204,7 @@ export default function AccountDrawer({
           isAdmin={isAdmin}
           onOpenAdmin={onOpenAdmin}
           onOpenPrivacy={onOpenPrivacy}
+          onOpenAbout={onOpenAbout}
         />
       </aside>
 
@@ -220,6 +235,7 @@ export default function AccountDrawer({
             isAdmin={isAdmin}
             onOpenAdmin={onOpenAdmin}
             onOpenPrivacy={onOpenPrivacy}
+            onOpenAbout={onOpenAbout}
           />
         </div>
       </div>

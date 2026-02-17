@@ -1,10 +1,14 @@
 interface FooterProps {
   onOpenPrivacy: () => void;
+  onOpenAbout: () => void;
 }
 
-export default function Footer({ onOpenPrivacy }: FooterProps) {
+export default function Footer({ onOpenPrivacy, onOpenAbout }: FooterProps) {
   return (
     <footer className="site-footer">
+      <button className="site-footer__link" onClick={onOpenAbout} type="button">
+        About
+      </button>
       <button className="site-footer__link" onClick={onOpenPrivacy} type="button">
         Privacy Policy
       </button>

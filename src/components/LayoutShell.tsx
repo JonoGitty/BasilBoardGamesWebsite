@@ -15,6 +15,7 @@ interface LayoutShellProps {
   isAdmin: boolean;
   onOpenAdmin: () => void;
   onOpenPrivacy: () => void;
+  onOpenAbout: () => void;
 }
 
 export default function LayoutShell({
@@ -25,6 +26,7 @@ export default function LayoutShell({
   isAdmin,
   onOpenAdmin,
   onOpenPrivacy,
+  onOpenAbout,
 }: LayoutShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -46,9 +48,10 @@ export default function LayoutShell({
           isAdmin={isAdmin}
           onOpenAdmin={onOpenAdmin}
           onOpenPrivacy={onOpenPrivacy}
+          onOpenAbout={onOpenAbout}
         />
       </main>
-      <Footer onOpenPrivacy={onOpenPrivacy} />
+      <Footer onOpenPrivacy={onOpenPrivacy} onOpenAbout={onOpenAbout} />
     </>
   );
 }

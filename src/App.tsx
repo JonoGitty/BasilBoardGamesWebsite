@@ -9,9 +9,10 @@ import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
 import AdminPanel from './components/AdminPanel';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import AboutPage from './components/AboutPage';
 import ConsentBanner from './components/ConsentBanner';
 
-type AppView = 'home' | 'game' | 'admin' | 'privacy';
+type AppView = 'home' | 'game' | 'admin' | 'privacy' | 'about';
 
 function AppContent() {
   const [view, setView] = useState<AppView>('home');
@@ -54,6 +55,18 @@ function AppContent() {
     setView('home');
   }, []);
 
+  const handleOpenAbout = useCallback(() => {
+    setView('about');
+  }, []);
+
+  const handleCloseAbout = useCallback(() => {
+    setView('home');
+  }, []);
+
+  if (view === 'about') {
+    return <AboutPage onBack={handleCloseAbout} />;
+  }
+
   if (view === 'privacy') {
     return <PrivacyPolicy onBack={handleClosePrivacy} />;
   }
@@ -76,6 +89,7 @@ function AppContent() {
         isAdmin={isAdmin}
         onOpenAdmin={handleOpenAdmin}
         onOpenPrivacy={handleOpenPrivacy}
+        onOpenAbout={handleOpenAbout}
       />
       <ConsentBanner onOpenPrivacy={handleOpenPrivacy} />
     </>
