@@ -3,10 +3,19 @@ import { GAMES } from '../data/games';
 import { fetchActiveGames } from '../services/gameCatalogApi';
 import type { Game } from '../types/game';
 
-const MAX_FEATURED = 6;
+const MAX_FEATURED = 4;
+const ALLOWED_IDS = ['elam', 'interrogate', 'almost', 'sidequests'];
+
+/** Filter and reorder games to match the approved allowlist. */
+function filterAllowed(list: Game[]): Game[] {
+  return ALLOWED_IDS
+    .map((id) => list.find((g) => g.id === id))
+    .filter((g): g is Game => g != null)
+    .slice(0, MAX_FEATURED);
+}
 
 /** Hardcoded fallback — displayed instantly before Supabase responds. */
-const FALLBACK: Game[] = GAMES.filter((g) => g.status === 'active').slice(0, MAX_FEATURED);
+const FALLBACK: Game[] = filterAllowed(GAMES);
 
 export function useFeaturedGames(): Game[] {
   const [games, setGames] = useState<Game[]>(FALLBACK);
@@ -16,7 +25,7 @@ export function useFeaturedGames(): Game[] {
 
     fetchActiveGames().then((active) => {
       if (!cancelled && active.length > 0) {
-        setGames(active.slice(0, MAX_FEATURED));
+        setGames(filterAllowed(active));
       }
     });
 

@@ -2,10 +2,10 @@ import type { Game } from '../types/game';
 
 export const GAMES: Game[] = [
   {
-    id: 'almost',
-    title: 'Almost',
-    description: 'Get as close as you can without going over. A game of near misses and bold guesses.',
-    emoji: '\u{1F3AF}',
+    id: 'elam',
+    title: 'Elam',
+    description: 'Build and trade in the cradle of civilisation. A strategic resource game.',
+    emoji: '\u{1F3DB}\uFE0F',
     status: 'active',
   },
   {
@@ -17,17 +17,17 @@ export const GAMES: Game[] = [
     url: import.meta.env.BASE_URL + 'games/interrogate/index.html',
   },
   {
+    id: 'almost',
+    title: 'Almost',
+    description: 'Get as close as you can without going over. A game of near misses and bold guesses.',
+    emoji: '\u{1F3AF}',
+    status: 'active',
+  },
+  {
     id: 'sidequests',
     title: 'Sidequests',
     description: 'Embark on unexpected detours. Complete side objectives before your rivals do.',
     emoji: '\u{1F5FA}\uFE0F',
-    status: 'active',
-  },
-  {
-    id: 'elam',
-    title: 'Elam',
-    description: 'Build and trade in the cradle of civilisation. A strategic resource game.',
-    emoji: '\u{1F3DB}\uFE0F',
     status: 'active',
   },
 ];
