@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { canonicalizeNickname } from '../utils/nickname';
 
@@ -12,41 +12,48 @@ export function useNicknameCheck(
   draft: string,
   savedNickname: string,
 ): { checking: boolean; taken: boolean } {
-  const [checking, setChecking] = useState(false);
-  const [taken, setTaken] = useState(false);
+  const [result, setResult] = useState<{ checking: boolean; taken: boolean }>({
+    checking: false,
+    taken: false,
+  });
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const aborted = useRef(false);
 
-  useEffect(() => {
+  const shouldCheck = useMemo(() => {
     const canonical = canonicalizeNickname(draft);
     const savedCanonical = canonicalizeNickname(savedNickname);
+    return !!canonical && canonical !== savedCanonical;
+  }, [draft, savedNickname]);
 
-    // Nothing to check
-    if (!canonical || canonical === savedCanonical) {
-      setTaken(false);
-      setChecking(false);
-      return;
-    }
+  useEffect(() => {
+    if (!shouldCheck) return;
 
-    setChecking(true);
+    aborted.current = false;
 
     timer.current = setTimeout(async () => {
-      if (!supabase) {
-        setChecking(false);
-        return;
-      }
+      if (!supabase || aborted.current) return;
 
       const { data, error } = await supabase.rpc('is_nickname_taken', {
         candidate: draft,
       });
 
+      if (aborted.current) return;
       if (!error && typeof data === 'boolean') {
-        setTaken(data);
+        setResult({ checking: false, taken: data });
+      } else {
+        setResult({ checking: false, taken: false });
       }
-      setChecking(false);
     }, DEBOUNCE_MS);
 
-    return () => clearTimeout(timer.current);
-  }, [draft, savedNickname]);
+    return () => {
+      aborted.current = true;
+      clearTimeout(timer.current);
+    };
+  }, [draft, shouldCheck]);
 
-  return { checking, taken };
+  if (!shouldCheck) {
+    return { checking: false, taken: false };
+  }
+
+  return result.checking ? result : { checking: true, taken: false };
 }
