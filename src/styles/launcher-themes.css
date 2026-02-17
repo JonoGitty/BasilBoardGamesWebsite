@@ -31,8 +31,9 @@
 }
 
 .launcher__icon {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
 .launcher__label {
@@ -71,42 +72,66 @@
 /* ── Craft Desk theme ─────────────────────────────────── */
 
 [data-launcher-theme="craft-desk"] {
-  background: linear-gradient(135deg, #8b7355 0%, #a0896b 50%, #8b7355 100%);
-  border: 3px dashed #6b563f;
+  /* Theme tokens */
+  --craft-border: #7a6347;
+  --craft-shadow: 2px 3px 8px rgba(0, 0, 0, 0.25);
+  --craft-shadow-hover: 3px 5px 14px rgba(0, 0, 0, 0.35);
+  --craft-label-bg: linear-gradient(180deg, #d4a853, #c49540);
+  --craft-label-text: #4a3620;
+  --craft-badge-bg: #d63031;
+  --craft-texture-opacity: 0.06;
+  --craft-paper: #f5ede0;
+  --craft-paper-border: #c4a882;
+  --craft-tape: rgba(255, 235, 180, 0.7);
+  --craft-focus-glow: rgba(212, 168, 83, 0.5);
+
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E") repeat,
+    linear-gradient(135deg, #7a6347 0%, #96805e 40%, #8b7355 70%, #7a6347 100%);
+  border: 3px dashed var(--craft-border);
+  padding: var(--space-xl) var(--space-lg);
   position: relative;
 }
 
-/* Decorative craft elements */
+/* Decorative craft props */
 [data-launcher-theme="craft-desk"]::before {
-  content: '\2702\FE0F';
+  content: '\1F4CC';
   position: absolute;
-  top: -14px;
-  left: 16px;
+  top: -10px;
+  right: 16px;
   font-size: 1.25rem;
-  transform: rotate(-20deg);
+  opacity: 0.6;
   pointer-events: none;
 }
 
 [data-launcher-theme="craft-desk"]::after {
-  content: '\1FAA1';
+  content: '';
   position: absolute;
-  bottom: -14px;
-  right: 16px;
-  font-size: 1.25rem;
-  transform: rotate(15deg);
+  bottom: 10px;
+  left: 14px;
+  width: 36px;
+  height: 12px;
+  background: var(--craft-tape);
+  border: 1px solid rgba(200, 180, 130, 0.3);
+  border-radius: 2px;
+  transform: rotate(-8deg);
+  opacity: 0.6;
   pointer-events: none;
 }
 
+/* Card — crafted physical object */
 [data-launcher-theme="craft-desk"] .launcher__card {
-  background: #f5ede0;
-  border: 2px dashed #c4a882;
-  border-radius: var(--radius-md);
-  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.2);
+  background: var(--craft-paper);
+  border: 2px dashed var(--craft-paper-border);
+  border-radius: 14px;
+  box-shadow:
+    var(--craft-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
   min-height: 140px;
 }
 
-/* Tape strip */
+/* Tape strip on card */
 [data-launcher-theme="craft-desk"] .launcher__card::before {
   content: '';
   position: absolute;
@@ -115,40 +140,59 @@
   transform: translateX(-50%) rotate(-2deg);
   width: 48px;
   height: 14px;
-  background: rgba(255, 235, 180, 0.75);
+  background: var(--craft-tape);
   border: 1px solid rgba(200, 180, 130, 0.4);
   border-radius: 2px;
   pointer-events: none;
 }
 
-[data-launcher-theme="craft-desk"] .launcher__card:hover,
-[data-launcher-theme="craft-desk"] .launcher__card:focus-visible {
-  transform: translateY(-8px) rotate(-1deg);
-  box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.3);
+/* Paper grain overlay on card */
+[data-launcher-theme="craft-desk"] .launcher__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E") repeat;
+  opacity: var(--craft-texture-opacity);
+  pointer-events: none;
+}
+
+/* Hover — subtle lift, no rotation */
+[data-launcher-theme="craft-desk"] .launcher__card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    var(--craft-shadow-hover),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   outline: none;
 }
 
+/* Focus-visible — warm golden glow */
 [data-launcher-theme="craft-desk"] .launcher__card:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 0 0 3px var(--craft-focus-glow);
+  outline: none;
 }
 
-[data-launcher-theme="craft-desk"] .launcher__icon {
-  font-size: 2.5rem;
+/* Active/press — snappy press-down */
+[data-launcher-theme="craft-desk"] .launcher__card:active {
+  transform: scale(0.98);
+  transition-duration: 80ms;
 }
 
 [data-launcher-theme="craft-desk"] .launcher__label {
-  color: #5a4630;
-  background: linear-gradient(180deg, #d4a853 0%, #c49540 100%);
+  color: var(--craft-label-text);
+  background: var(--craft-label-bg);
   font-size: var(--font-size-sm);
   font-weight: 700;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 [data-launcher-theme="craft-desk"] .launcher__badge {
-  background: #e53e3e;
+  background: var(--craft-badge-bg);
   color: #fff;
-  transform: rotate(8deg);
-  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  transform: rotate(4deg);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Netflix Tiles theme ──────────────────────────────── */
@@ -198,6 +242,20 @@
   left: 8px;
   right: auto;
   transform: none;
+}
+
+/* ── Mobile: craft-desk adjustments (max-width: 1023px) ─ */
+
+@media (max-width: 1023px) {
+  [data-launcher-theme="craft-desk"]::before,
+  [data-launcher-theme="craft-desk"]::after {
+    display: none;
+  }
+
+  [data-launcher-theme="craft-desk"] .launcher__card {
+    padding: var(--space-md) var(--space-sm);
+    min-height: 120px;
+  }
 }
 
 /* ── Desktop (min-width: 1024px) ──────────────────────── */
