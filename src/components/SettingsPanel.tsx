@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Profile } from '../types/profile';
 import { AVATAR_ICONS, ACCENT_COLORS } from '../types/profile';
 import { track } from '../analytics/track';
@@ -20,9 +20,13 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack, isAd
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [draftNickname, setDraftNickname] = useState(profile.nickname);
+  const [lastSynced, setLastSynced] = useState(profile.nickname);
 
   // Sync draft when profile changes externally (e.g. cloud sync)
-  useEffect(() => { setDraftNickname(profile.nickname); }, [profile.nickname]);
+  if (profile.nickname !== lastSynced) {
+    setLastSynced(profile.nickname);
+    setDraftNickname(profile.nickname);
+  }
 
   const nicknameError = validateNickname(draftNickname, isAdmin);
   const { checking, taken } = useNicknameCheck(draftNickname, profile.nickname);
