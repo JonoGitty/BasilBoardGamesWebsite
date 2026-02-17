@@ -59,8 +59,8 @@ async function invokeAdminCommand<TResult>(
 // ── Games ────────────────────────────────────────────────
 
 /** Fetch ALL games (including vaulted/disabled) for admin management. */
-export async function fetchAllGames(): Promise<AdminGameRow[]> {
-  if (!supabase) return [];
+export async function fetchAllGames(): Promise<{ data: AdminGameRow[]; error?: string }> {
+  if (!supabase) return { data: [], error: 'Supabase not configured' };
 
   const { data, error } = await supabase
     .from('games')
@@ -68,8 +68,9 @@ export async function fetchAllGames(): Promise<AdminGameRow[]> {
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true });
 
-  if (error || !data) return [];
-  return data as AdminGameRow[];
+  if (error) return { data: [], error: error.message };
+  if (!data) return { data: [], error: 'No data returned' };
+  return { data: data as AdminGameRow[] };
 }
 
 /** Update a game's fields. Returns true on success. */

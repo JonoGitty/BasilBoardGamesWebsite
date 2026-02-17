@@ -17,18 +17,20 @@ export function useAdminGames() {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const data = await fetchAllGames();
-    setGames(data);
-    setServerGames(data);
+    const result = await fetchAllGames();
+    if (result.error) setError(result.error);
+    setGames(result.data);
+    setServerGames(result.data);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    fetchAllGames().then((data) => {
+    fetchAllGames().then((result) => {
       if (!cancelled) {
-        setGames(data);
-        setServerGames(data);
+        if (result.error) setError(result.error);
+        setGames(result.data);
+        setServerGames(result.data);
         setLoading(false);
       }
     });
