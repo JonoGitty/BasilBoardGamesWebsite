@@ -56,6 +56,25 @@ In the Supabase dashboard under **Authentication > URL Configuration**:
 The Site URL is the default redirect for confirmation emails. The additional
 redirect URLs are the allowed targets for `emailRedirectTo` in the signup call.
 
+## Elam (Triarch) External Service
+
+Elam is NOT a static bundle — it requires its own Node.js server.
+The hub opens it in a new tab via `play.basilboardgames.co.uk`.
+
+**Pre-requisites for Elam to work in production:**
+1. Triarch Node.js server running (`npm start` in Triarch repo)
+2. Cloudflare tunnel active mapping `play.basilboardgames.co.uk` → `localhost:8787`
+3. Health check passes: `curl https://play.basilboardgames.co.uk/api/online/health`
+
+**To check service status:**
+```bash
+npm run elam:check
+```
+
+**Optional override:** Set `VITE_ELAM_URL` GitHub secret to point to a different URL.
+
+See `docs/elam-service-runbook.md` and `docs/elam-integration-audit.md` for details.
+
 ## Environment Notes
 
 - The `base` path in `vite.config.ts` is set to `/` for the custom domain

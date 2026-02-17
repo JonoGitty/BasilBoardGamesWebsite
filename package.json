@@ -13,7 +13,8 @@
     "ci": "npm run typecheck && npm run lint && npm run test && npm run build",
     "preview": "vite preview",
     "game:import": "node scripts/import-static-game.mjs",
-    "game:import:interrogate": "node scripts/import-static-game.mjs --id interrogate --source \"C:\\AI\\Interrogate!\""
+    "game:import:interrogate": "node scripts/import-static-game.mjs --id interrogate --source \"C:\\AI\\Interrogate!\"",
+    "elam:check": "node scripts/check-elam-service.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3",

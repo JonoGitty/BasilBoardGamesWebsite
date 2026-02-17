@@ -1,4 +1,5 @@
 import type { Game } from '../types/game';
+import { getElamUrl } from '../lib/elamUrl';
 
 export const GAMES: Game[] = [
   {
@@ -7,6 +8,7 @@ export const GAMES: Game[] = [
     description: 'Build and trade in the cradle of civilisation. A strategic resource game.',
     emoji: '\u{1F3DB}\uFE0F',
     status: 'active',
+    url: getElamUrl(),
   },
   {
     id: 'interrogate',

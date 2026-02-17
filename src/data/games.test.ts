@@ -20,6 +20,12 @@ describe('games manifest', () => {
     expect(interrogate!.url).toContain('games/interrogate/index.html');
   });
 
+  it('elam has a url pointing to the external service', () => {
+    const elam = GAMES.find((g) => g.id === 'elam');
+    expect(elam).toBeDefined();
+    expect(elam!.url).toMatch(/^https?:\/\//);
+  });
+
   it('all games have required fields', () => {
     for (const game of GAMES) {
       expect(game.id).toBeTruthy();
