@@ -980,6 +980,39 @@ body {
   white-space: nowrap;
 }
 
+.admin__inline-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.admin__select {
+  min-height: 32px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+.admin__order-input {
+  width: 60px;
+  min-height: 32px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.admin__game-tag {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+}
+
+.admin__game-tag--disabled {
+  color: #fb7185;
+}
+
+.admin__game-tag--vault {
+  color: #fbbf24;
+}
+
 /* Post row */
 .admin__post-row {
   display: flex;

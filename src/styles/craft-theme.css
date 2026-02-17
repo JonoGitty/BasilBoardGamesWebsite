@@ -181,6 +181,15 @@ html[data-theme="craft-desk"] {
   color: #92400e;
 }
 
+/* Admin game tags — warm-safe colors */
+[data-theme="craft-desk"] .admin__game-tag--disabled {
+  color: #be123c;
+}
+
+[data-theme="craft-desk"] .admin__game-tag--vault {
+  color: #92400e;
+}
+
 /* ── 3k. Launcher refinements — warm shadows ─────────── */
 
 [data-theme="craft-desk"] [data-launcher-theme="craft-desk"] {

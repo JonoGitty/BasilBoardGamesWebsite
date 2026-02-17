@@ -1,24 +1,52 @@
 import { useAdminGames } from '../hooks/useAdminGames';
 import { track } from '../analytics/track';
 import type { AdminGameRow } from '../types/admin';
+import type { GameStatus } from '../types/game';
+
+const STATUS_OPTIONS: { value: GameStatus; label: string }[] = [
+  { value: 'prototype', label: 'Prototype' },
+  { value: 'beta', label: 'Beta' },
+  { value: 'polished', label: 'Polished' },
+  { value: 'live', label: 'Live' },
+];
 
 function GameRow({
   game,
+  onToggleEnabled,
   onToggleVault,
   onTogglePin,
+  onStatusChange,
+  onOrderChange,
 }: {
   game: AdminGameRow;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
   onToggleVault: (id: string, vault: boolean) => void;
   onTogglePin: (id: string, pinned: boolean) => void;
+  onStatusChange: (id: string, status: GameStatus) => void;
+  onOrderChange: (id: string, order: number) => void;
 }) {
   return (
     <div className="admin__game-row">
       <span className="admin__game-emoji" aria-hidden="true">{game.emoji}</span>
       <div className="admin__game-info">
-        <span className="admin__game-title">{game.title}</span>
+        <span className="admin__game-title">
+          {game.title}
+          {!game.enabled && <span className="admin__game-tag admin__game-tag--disabled"> (Hidden)</span>}
+          {game.vault && game.enabled && <span className="admin__game-tag admin__game-tag--vault"> (Vaulted)</span>}
+        </span>
         <span className="admin__game-id">{game.id}</span>
       </div>
       <div className="admin__game-controls">
+        <label className="admin__toggle">
+          <span className="admin__toggle-label">Shown</span>
+          <input
+            type="checkbox"
+            className="settings__checkbox"
+            checked={game.enabled}
+            onChange={() => onToggleEnabled(game.id, !game.enabled)}
+          />
+          <span className="settings__toggle-track" />
+        </label>
         <label className="admin__toggle">
           <span className="admin__toggle-label">Active</span>
           <input
@@ -39,6 +67,28 @@ function GameRow({
           />
           <span className="settings__toggle-track" />
         </label>
+        <label className="admin__inline-field">
+          <span className="admin__toggle-label">Status</span>
+          <select
+            className="settings__input admin__select"
+            value={game.status}
+            onChange={(e) => onStatusChange(game.id, e.target.value as GameStatus)}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="admin__inline-field">
+          <span className="admin__toggle-label">Order</span>
+          <input
+            type="number"
+            className="settings__input admin__order-input"
+            value={game.sort_order}
+            min={0}
+            onChange={(e) => onOrderChange(game.id, parseInt(e.target.value, 10) || 0)}
+          />
+        </label>
       </div>
     </div>
   );
@@ -46,6 +96,10 @@ function GameRow({
 
 export default function AdminGamesTab() {
   const { games, loading, saving, error, lineupDirty, toggleLocal, update, applyLineup } = useAdminGames();
+
+  const handleToggleEnabled = (id: string, enabled: boolean) => {
+    toggleLocal(id, 'enabled', enabled);
+  };
 
   const handleToggleVault = (id: string, vault: boolean) => {
     toggleLocal(id, 'vault', vault);
@@ -55,6 +109,20 @@ export default function AdminGamesTab() {
     const result = await update(id, { pinned });
     if (result.ok) {
       track('admin_game_update', { gameId: id, fields: ['pinned'] });
+    }
+  };
+
+  const handleStatusChange = async (id: string, status: GameStatus) => {
+    const result = await update(id, { status });
+    if (result.ok) {
+      track('admin_game_update', { gameId: id, fields: ['status'] });
+    }
+  };
+
+  const handleOrderChange = async (id: string, order: number) => {
+    const result = await update(id, { sort_order: order });
+    if (result.ok) {
+      track('admin_game_update', { gameId: id, fields: ['sort_order'] });
     }
   };
 
@@ -78,8 +146,11 @@ export default function AdminGamesTab() {
           <GameRow
             key={game.id}
             game={game}
+            onToggleEnabled={handleToggleEnabled}
             onToggleVault={handleToggleVault}
             onTogglePin={handleTogglePin}
+            onStatusChange={handleStatusChange}
+            onOrderChange={handleOrderChange}
           />
         ))}
       </div>

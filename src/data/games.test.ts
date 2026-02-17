@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { GAMES } from './games';
 
 const REQUIRED_IDS = ['elam', 'interrogate', 'almost', 'sidequests'];
+const VALID_STATUSES = ['prototype', 'beta', 'polished', 'live'];
 
 describe('games manifest', () => {
-  it('has exactly 4 active games', () => {
-    const active = GAMES.filter((g) => g.status === 'active');
-    expect(active).toHaveLength(4);
+  it('has exactly 4 games', () => {
+    expect(GAMES).toHaveLength(4);
   });
 
-  it('active IDs match the approved lineup in exact order', () => {
-    const activeIds = GAMES.filter((g) => g.status === 'active').map((g) => g.id);
-    expect(activeIds).toEqual(REQUIRED_IDS);
+  it('IDs match the approved lineup in exact order', () => {
+    const ids = GAMES.map((g) => g.id);
+    expect(ids).toEqual(REQUIRED_IDS);
   });
 
   it('interrogate has a url pointing to the static bundle', () => {
@@ -32,7 +32,8 @@ describe('games manifest', () => {
       expect(game.title).toBeTruthy();
       expect(game.description).toBeTruthy();
       expect(game.emoji).toBeTruthy();
-      expect(['active', 'coming_soon', 'archived']).toContain(game.status);
+      expect(VALID_STATUSES).toContain(game.status);
+      expect(typeof game.sortOrder).toBe('number');
     }
   });
 

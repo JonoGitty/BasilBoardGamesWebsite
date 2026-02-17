@@ -1,4 +1,5 @@
 import type { PostCategory } from './whatsNew';
+import type { GameStatus } from './game';
 
 /** Row shape returned from Supabase games table for admin use. */
 export interface AdminGameRow {
@@ -9,6 +10,9 @@ export interface AdminGameRow {
   url: string | null;
   pinned: boolean;
   vault: boolean;
+  enabled: boolean;
+  status: GameStatus;
+  sort_order: number;
   cooldown_until: string | null;
   updated_at: string;
   created_at: string;
@@ -22,6 +26,9 @@ export interface GameUpdatePayload {
   url?: string | null;
   pinned?: boolean;
   vault?: boolean;
+  enabled?: boolean;
+  status?: GameStatus;
+  sort_order?: number;
 }
 
 /** Row shape returned from Supabase posts table. */

@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { GAMES } from '../data/games';
-import type { Game } from '../types/game';
+import type { Game, GameStatus } from '../types/game';
 
 interface GameRow {
   id: string;
@@ -10,6 +10,21 @@ interface GameRow {
   url: string | null;
   pinned: boolean;
   vault: boolean;
+  enabled: boolean;
+  status: GameStatus;
+  sort_order: number;
+}
+
+/** Derive a display badge from the game status. */
+function badgeFromStatus(status: GameStatus): string | undefined {
+  switch (status) {
+    case 'beta':
+      return 'beta';
+    case 'prototype':
+      return 'prototype';
+    default:
+      return undefined;
+  }
 }
 
 function toGame(row: GameRow): Game {
@@ -19,30 +34,37 @@ function toGame(row: GameRow): Game {
     description: row.description,
     emoji: row.emoji,
     url: row.url ?? undefined,
-    status: row.vault ? 'coming_soon' : 'active',
+    status: row.status,
+    badge: badgeFromStatus(row.status),
+    sortOrder: row.sort_order,
   };
 }
 
 /**
- * Fetch the active game lineup from Supabase.
+ * Fetch the visible game lineup from Supabase.
+ * Only returns games where enabled=true AND vault=false.
+ * Ordered by sort_order then created_at.
  * Falls back to the hardcoded GAMES array if Supabase is unavailable.
  */
 export async function fetchActiveGames(): Promise<Game[]> {
   if (!supabase) {
-    return GAMES.filter((g) => g.status === 'active');
+    return GAMES;
   }
 
   const { data, error } = await supabase
     .from('games')
-    .select('id, title, description, emoji, url, pinned, vault')
-    .eq('vault', false);
+    .select('id, title, description, emoji, url, pinned, vault, enabled, status, sort_order')
+    .eq('vault', false)
+    .eq('enabled', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
 
   if (error || !data || data.length === 0) {
-    return GAMES.filter((g) => g.status === 'active');
+    return GAMES;
   }
 
   return (data as GameRow[]).map(toGame);
 }
 
 // Exported for testing
-export { toGame };
+export { toGame, badgeFromStatus };

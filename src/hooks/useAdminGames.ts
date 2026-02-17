@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchAllGames, updateGame, setActiveLineup as apiSetActiveLineup } from '../services/adminApi';
 import type { AdminGameRow, GameUpdatePayload } from '../types/admin';
 
+/** Fields tracked for dirty detection (lineup bar). */
+const LINEUP_FIELDS: (keyof AdminGameRow)[] = ['vault', 'enabled'];
+
 export function useAdminGames() {
   const [games, setGames] = useState<AdminGameRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  /** Snapshot of vault state from last server fetch, for dirty detection. */
+  /** Snapshot of state from last server fetch, for dirty detection. */
   const [serverGames, setServerGames] = useState<AdminGameRow[]>([]);
 
   const refresh = useCallback(async () => {
@@ -32,9 +35,9 @@ export function useAdminGames() {
     return () => { cancelled = true; };
   }, []);
 
-  /** Toggle local vault/pinned state (optimistic, no server call). */
+  /** Toggle local boolean state (optimistic, no server call). */
   const toggleLocal = useCallback(
-    (gameId: string, field: 'vault' | 'pinned', value: boolean) => {
+    (gameId: string, field: 'vault' | 'pinned' | 'enabled', value: boolean) => {
       setGames((prev) =>
         prev.map((g) => (g.id === gameId ? { ...g, [field]: value } : g)),
       );
@@ -42,7 +45,17 @@ export function useAdminGames() {
     [],
   );
 
-  /** Patch a single game field (e.g. pinned) via command. */
+  /** Update a local field (optimistic, no server call). */
+  const setLocalField = useCallback(
+    (gameId: string, field: keyof AdminGameRow, value: unknown) => {
+      setGames((prev) =>
+        prev.map((g) => (g.id === gameId ? { ...g, [field]: value } : g)),
+      );
+    },
+    [],
+  );
+
+  /** Patch a single game field via command (persists immediately). */
   const update = useCallback(
     async (gameId: string, payload: GameUpdatePayload) => {
       setGames((prev) =>
@@ -54,6 +67,11 @@ export function useAdminGames() {
       if (!result.ok) {
         setError(result.error ?? 'Update failed');
         await refresh();
+      } else {
+        // Sync server snapshot for the updated game
+        setServerGames((prev) =>
+          prev.map((g) => (g.id === gameId ? { ...g, ...payload } : g)),
+        );
       }
       return result;
     },
@@ -81,11 +99,12 @@ export function useAdminGames() {
     return result;
   }, [games, refresh]);
 
-  /** Whether the local vault state differs from the last server state. */
+  /** Whether the local lineup/visibility state differs from the last server state. */
   const lineupDirty = games.some((g) => {
     const server = serverGames.find((s) => s.id === g.id);
-    return server ? server.vault !== g.vault : false;
+    if (!server) return false;
+    return LINEUP_FIELDS.some((f) => server[f] !== g[f]);
   });
 
-  return { games, loading, saving, error, lineupDirty, toggleLocal, update, applyLineup, refresh };
+  return { games, loading, saving, error, lineupDirty, toggleLocal, setLocalField, update, applyLineup, refresh };
 }

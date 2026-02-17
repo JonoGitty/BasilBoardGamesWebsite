@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const POST_CATEGORIES = new Set(["patch", "experiment", "announcement"]);
 const VALID_LAUNCHER_STYLES = new Set(["classic", "craft-desk", "netflix"]);
+const VALID_GAME_STATUSES = new Set(["prototype", "beta", "polished", "live"]);
 const VALID_COMMANDS = [
   "games.patch",
   "games.set_active_lineup",
@@ -189,6 +190,30 @@ async function executeGamesPatch(
     update.vault = readBooleanField(changesRaw, "vault");
     updatedFields += 1;
   }
+  if ("enabled" in changesRaw) {
+    update.enabled = readBooleanField(changesRaw, "enabled");
+    updatedFields += 1;
+  }
+  if ("status" in changesRaw) {
+    const status = readStringField(changesRaw, "status", 20);
+    if (!VALID_GAME_STATUSES.has(status)) {
+      fail(
+        400,
+        "invalid_args",
+        `Invalid game status "${status}". Must be one of: ${[...VALID_GAME_STATUSES].join(", ")}`,
+      );
+    }
+    update.status = status;
+    updatedFields += 1;
+  }
+  if ("sort_order" in changesRaw) {
+    const value = changesRaw.sort_order;
+    if (typeof value !== "number" || !Number.isInteger(value)) {
+      fail(400, "invalid_args", 'Expected "sort_order" to be an integer');
+    }
+    update.sort_order = value;
+    updatedFields += 1;
+  }
 
   if (updatedFields === 0) {
     fail(400, "invalid_args", "No valid game fields provided in changes");
@@ -198,7 +223,7 @@ async function executeGamesPatch(
     .from("games")
     .update(update)
     .eq("id", gameId)
-    .select("id, title, description, emoji, url, pinned, vault, updated_at")
+    .select("id, title, description, emoji, url, pinned, vault, enabled, status, sort_order, updated_at")
     .maybeSingle();
 
   if (error) {
