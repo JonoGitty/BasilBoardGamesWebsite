@@ -38,3 +38,15 @@ dist-ssr
 
 # Supabase local state
 supabase/.temp/
+
+# Design inspiration / private assets
+INSPO/
+
+# Claude Code local state
+.claude/
+
+# Credentials & secrets
+*.pem
+*.key
+credentials.json
+service-account.json
