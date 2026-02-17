@@ -41,10 +41,15 @@ async function invokeAdminCommand<TResult>(
   });
 
   if (error) {
-    // Supabase FunctionsHttpError stores the response body in error.context
-    const ctx = (error as { context?: { error?: string } }).context;
-    const detail = ctx?.error ?? error.message;
-    return { ok: false, error: detail };
+    // FunctionsHttpError stores the raw Response in error.context
+    const resp = (error as { context?: Response }).context;
+    if (resp && typeof resp.json === 'function') {
+      try {
+        const body = await resp.json();
+        return { ok: false, error: body?.error ?? error.message };
+      } catch { /* fall through */ }
+    }
+    return { ok: false, error: error.message };
   }
 
   if (!data || typeof data !== 'object') {
