@@ -73,6 +73,10 @@ node scripts/admin-command-cli.mjs posts.set_published \
 # Delete a post
 node scripts/admin-command-cli.mjs posts.delete \
   '{"postId":"old-post"}'
+
+# Set launcher style
+node scripts/admin-command-cli.mjs site.set_launcher_style \
+  '{"style":"craft-desk"}'
 ```
 
 ## Command Audit Log

@@ -1,0 +1,229 @@
+/* ── Launcher themes: Craft Desk + Netflix Tiles ──────── */
+/* Scoped by [data-launcher-theme="..."] — classic theme uses .card-fan in layout.css */
+
+/* ── Base (shared by craft-desk + netflix) ────────────── */
+
+.launcher {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  min-height: 260px;
+  border-radius: var(--radius-md);
+}
+
+.launcher__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+  transition:
+    transform var(--duration-normal) var(--ease-out),
+    opacity var(--duration-normal) var(--ease-out);
+  will-change: transform, opacity;
+}
+
+.launcher__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.launcher__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-align: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.launcher__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+
+/* Launch animation states */
+.launcher__card--target {
+  transform: scale(1.15) translateY(-20px);
+  z-index: 20;
+}
+
+.launcher__card--fade {
+  opacity: 0.3;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+/* ── Craft Desk theme ─────────────────────────────────── */
+
+[data-launcher-theme="craft-desk"] {
+  background: linear-gradient(135deg, #8b7355 0%, #a0896b 50%, #8b7355 100%);
+  border: 3px dashed #6b563f;
+  position: relative;
+}
+
+/* Decorative craft elements */
+[data-launcher-theme="craft-desk"]::before {
+  content: '\2702\FE0F';
+  position: absolute;
+  top: -14px;
+  left: 16px;
+  font-size: 1.25rem;
+  transform: rotate(-20deg);
+  pointer-events: none;
+}
+
+[data-launcher-theme="craft-desk"]::after {
+  content: '\1FAA1';
+  position: absolute;
+  bottom: -14px;
+  right: 16px;
+  font-size: 1.25rem;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__card {
+  background: #f5ede0;
+  border: 2px dashed #c4a882;
+  border-radius: var(--radius-md);
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  min-height: 140px;
+}
+
+/* Tape strip */
+[data-launcher-theme="craft-desk"] .launcher__card::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 48px;
+  height: 14px;
+  background: rgba(255, 235, 180, 0.75);
+  border: 1px solid rgba(200, 180, 130, 0.4);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__card:hover,
+[data-launcher-theme="craft-desk"] .launcher__card:focus-visible {
+  transform: translateY(-8px) rotate(-1deg);
+  box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__icon {
+  font-size: 2.5rem;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__label {
+  color: #5a4630;
+  background: linear-gradient(180deg, #d4a853 0%, #c49540 100%);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+[data-launcher-theme="craft-desk"] .launcher__badge {
+  background: #e53e3e;
+  color: #fff;
+  transform: rotate(8deg);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Netflix Tiles theme ──────────────────────────────── */
+
+[data-launcher-theme="netflix"] {
+  background: transparent;
+  border: none;
+  gap: var(--space-md);
+}
+
+[data-launcher-theme="netflix"] .launcher__card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  min-height: 140px;
+  padding: var(--space-lg) var(--space-md);
+}
+
+[data-launcher-theme="netflix"] .launcher__card:hover,
+[data-launcher-theme="netflix"] .launcher__card:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  outline: none;
+}
+
+[data-launcher-theme="netflix"] .launcher__card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[data-launcher-theme="netflix"] .launcher__icon {
+  font-size: 2.5rem;
+}
+
+[data-launcher-theme="netflix"] .launcher__label {
+  color: var(--text-primary);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: 6px 12px;
+}
+
+[data-launcher-theme="netflix"] .launcher__badge {
+  background: #e50914;
+  color: #fff;
+  top: 8px;
+  left: 8px;
+  right: auto;
+  transform: none;
+}
+
+/* ── Desktop (min-width: 1024px) ──────────────────────── */
+
+@media (min-width: 1024px) {
+  [data-launcher-theme="craft-desk"] {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  [data-launcher-theme="netflix"] {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-md);
+  }
+
+  [data-launcher-theme="netflix"] .launcher__card {
+    flex: 1;
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher__card,
+  .launcher__card--target,
+  .launcher__card--fade {
+    transition-duration: 0.01ms !important;
+  }
+}

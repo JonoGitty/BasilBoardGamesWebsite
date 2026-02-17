@@ -8,7 +8,8 @@ import type { Profile } from '../types/profile';
 const STORAGE_KEY = 'basil_profile';
 
 export function useProfile() {
-  const [profile, setProfile] = useLocalStorage<Profile>(STORAGE_KEY, DEFAULT_PROFILE);
+  const [stored, setProfile] = useLocalStorage<Profile>(STORAGE_KEY, DEFAULT_PROFILE);
+  const profile = { ...DEFAULT_PROFILE, ...stored };
   const { user } = useAuth();
   const hasSynced = useRef(false);
 

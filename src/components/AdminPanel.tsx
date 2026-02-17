@@ -1,15 +1,19 @@
 import { useState } from 'react';
+import type { Profile } from '../types/profile';
 import AdminGamesTab from './AdminGamesTab';
 import AdminPostsTab from './AdminPostsTab';
 import MetricsTab from './MetricsTab';
+import AdminSettingsTab from './AdminSettingsTab';
 
-type AdminTab = 'games' | 'posts' | 'metrics';
+type AdminTab = 'games' | 'posts' | 'metrics' | 'settings';
 
 interface AdminPanelProps {
   onBack: () => void;
+  profile: Profile;
+  onUpdateProfile: (patch: Partial<Profile>) => void;
 }
 
-export default function AdminPanel({ onBack }: AdminPanelProps) {
+export default function AdminPanel({ onBack, profile, onUpdateProfile }: AdminPanelProps) {
   const [tab, setTab] = useState<AdminTab>('games');
 
   return (
@@ -41,10 +45,19 @@ export default function AdminPanel({ onBack }: AdminPanelProps) {
           >
             Metrics
           </button>
+          <button
+            className={`admin__tab${tab === 'settings' ? ' admin__tab--active' : ''}`}
+            onClick={() => setTab('settings')}
+          >
+            Settings
+          </button>
         </nav>
       </header>
       <div className="admin__content">
-        {tab === 'games' ? <AdminGamesTab /> : tab === 'posts' ? <AdminPostsTab /> : <MetricsTab />}
+        {tab === 'games' && <AdminGamesTab />}
+        {tab === 'posts' && <AdminPostsTab />}
+        {tab === 'metrics' && <MetricsTab />}
+        {tab === 'settings' && <AdminSettingsTab profile={profile} onUpdateProfile={onUpdateProfile} />}
       </div>
     </div>
   );

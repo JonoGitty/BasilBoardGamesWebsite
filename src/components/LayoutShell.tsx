@@ -3,7 +3,7 @@ import type { Game } from '../types/game';
 import type { Profile } from '../types/profile';
 import TopBar from './TopBar';
 import WhatsNew from './WhatsNew';
-import GameCarousel from './GameCarousel';
+import GameLauncher from './GameLauncher';
 import AccountDrawer from './AccountDrawer';
 import Footer from './Footer';
 
@@ -38,7 +38,7 @@ export default function LayoutShell({
       <TopBar onMenuOpen={openDrawer} />
       <main className="shell">
         <WhatsNew />
-        <GameCarousel onLaunch={onLaunchGame} />
+        <GameLauncher theme={profile.launcherStyle} onLaunch={onLaunchGame} />
         <AccountDrawer
           open={drawerOpen}
           onClose={closeDrawer}

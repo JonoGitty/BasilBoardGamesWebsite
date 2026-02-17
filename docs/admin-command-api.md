@@ -108,6 +108,14 @@ Delete a post by ID.
 
 - `postId: string`
 
+## `site.set_launcher_style`
+
+Set the game launcher theme for the admin's profile.
+
+`args`:
+
+- `style: "classic" | "craft-desk" | "netflix"`
+
 ## Audit Log
 
 Every command invocation is logged to `admin_command_log` (migration `010_admin_command_audit.sql`).

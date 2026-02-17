@@ -54,4 +54,5 @@ export type AdminCommandName =
   | 'posts.upsert_draft'
   | 'posts.patch'
   | 'posts.set_published'
-  | 'posts.delete';
+  | 'posts.delete'
+  | 'site.set_launcher_style';

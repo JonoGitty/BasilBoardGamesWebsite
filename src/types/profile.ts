@@ -1,3 +1,11 @@
+export type LauncherStyle = 'classic' | 'craft-desk' | 'netflix';
+
+export const LAUNCHER_STYLES: { label: string; value: LauncherStyle }[] = [
+  { label: 'Craft Desk', value: 'craft-desk' },
+  { label: 'Netflix Tiles', value: 'netflix' },
+  { label: 'Classic (Fanned Cards)', value: 'classic' },
+];
+
 export interface Profile {
   nickname: string;
   avatarIcon: string;
@@ -5,6 +13,7 @@ export interface Profile {
   reducedMotion: boolean;
   analyticsOptOut: boolean;
   role: 'user' | 'admin';
+  launcherStyle: LauncherStyle;
 }
 
 export const AVATAR_ICONS = [
@@ -34,4 +43,5 @@ export const DEFAULT_PROFILE: Profile = {
   reducedMotion: false,
   analyticsOptOut: false,
   role: 'user',
+  launcherStyle: 'craft-desk',
 };

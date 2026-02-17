@@ -9,6 +9,7 @@ describe('profileSync mapping', () => {
     reducedMotion: true,
     analyticsOptOut: false,
     role: 'user' as const,
+    launcherStyle: 'craft-desk' as const,
   };
 
   const row = {
@@ -18,6 +19,7 @@ describe('profileSync mapping', () => {
     reduced_motion: true,
     analytics_opt_out: false,
     role: 'user',
+    launcher_style: 'craft-desk',
     updated_at: '2026-01-01T00:00:00Z',
   };
 
@@ -34,6 +36,7 @@ describe('profileSync mapping', () => {
       accent_color: '#60a5fa',
       reduced_motion: true,
       analytics_opt_out: false,
+      launcher_style: 'craft-desk',
     });
   });
 

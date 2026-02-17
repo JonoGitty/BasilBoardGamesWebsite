@@ -8,6 +8,7 @@ interface ProfileRow {
   reduced_motion: boolean;
   analytics_opt_out: boolean;
   role: string;
+  launcher_style: string;
   updated_at: string;
 }
 
@@ -19,6 +20,7 @@ function toProfile(row: ProfileRow): Profile {
     reducedMotion: row.reduced_motion,
     analyticsOptOut: row.analytics_opt_out,
     role: row.role === 'admin' ? 'admin' : 'user',
+    launcherStyle: (row.launcher_style as Profile['launcherStyle']) ?? 'craft-desk',
   };
 }
 
@@ -29,6 +31,7 @@ function toRow(profile: Profile): Omit<ProfileRow, 'updated_at' | 'role'> {
     accent_color: profile.accentColor,
     reduced_motion: profile.reducedMotion,
     analytics_opt_out: profile.analyticsOptOut,
+    launcher_style: profile.launcherStyle,
   };
 }
 
@@ -37,7 +40,7 @@ export async function fetchCloudProfile(userId: string): Promise<Profile | null>
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('display_name, avatar_icon, accent_color, reduced_motion, analytics_opt_out, role, updated_at')
+    .select('display_name, avatar_icon, accent_color, reduced_motion, analytics_opt_out, role, launcher_style, updated_at')
     .eq('id', userId)
     .single();
 

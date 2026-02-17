@@ -76,7 +76,7 @@ function AppContent() {
   }
 
   if (view === 'admin' && isAdmin) {
-    return <AdminPanel onBack={handleCloseAdmin} />;
+    return <AdminPanel onBack={handleCloseAdmin} profile={profile} onUpdateProfile={update} />;
   }
 
   return (

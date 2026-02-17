@@ -24,6 +24,7 @@ export const GAMES: Game[] = [
     description: 'Get as close as you can without going over. A game of near misses and bold guesses.',
     emoji: '\u{1F3AF}',
     status: 'active',
+    badge: 'beta',
   },
   {
     id: 'sidequests',

@@ -203,5 +203,21 @@ export async function deletePost(
   return { ok: true };
 }
 
+// ── Site settings ────────────────────────────────────────
+
+/** Set the launcher style via admin command. */
+export async function setLauncherStyle(
+  style: import('../types/profile').LauncherStyle,
+): Promise<{ ok: boolean; error?: string }> {
+  const cmd = await invokeAdminCommand<{ style: string }>(
+    'site.set_launcher_style',
+    { style },
+  );
+  if (!cmd.ok) {
+    return { ok: false, error: cmd.error ?? 'Failed to set launcher style' };
+  }
+  return { ok: true };
+}
+
 // Exported for testing
 export { toAdminPost };

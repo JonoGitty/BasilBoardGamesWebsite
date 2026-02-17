@@ -802,7 +802,8 @@ body {
     grid-row: 1;
   }
 
-  .card-fan {
+  .card-fan,
+  .launcher {
     grid-column: 1;
     grid-row: 2;
     min-height: 320px;

@@ -2,6 +2,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const POST_CATEGORIES = new Set(["patch", "experiment", "announcement"]);
+const VALID_LAUNCHER_STYLES = new Set(["classic", "craft-desk", "netflix"]);
 const VALID_COMMANDS = [
   "games.patch",
   "games.set_active_lineup",
@@ -9,6 +10,7 @@ const VALID_COMMANDS = [
   "posts.patch",
   "posts.set_published",
   "posts.delete",
+  "site.set_launcher_style",
 ] as const;
 
 type CommandName = (typeof VALID_COMMANDS)[number];
@@ -460,6 +462,32 @@ async function executeDeletePost(
   };
 }
 
+async function executeSiteSetLauncherStyle(
+  db: ReturnType<typeof createClient>,
+  args: Record<string, unknown>,
+  actorUserId: string,
+) {
+  const style = readStringField(args, "style", 20);
+  if (!VALID_LAUNCHER_STYLES.has(style)) {
+    fail(
+      400,
+      "invalid_args",
+      `Invalid launcher style "${style}". Must be one of: ${[...VALID_LAUNCHER_STYLES].join(", ")}`,
+    );
+  }
+
+  const { error } = await db
+    .from("profiles")
+    .update({ launcher_style: style, updated_at: new Date().toISOString() })
+    .eq("id", actorUserId);
+
+  if (error) {
+    fail(500, "profile_update_failed", error.message);
+  }
+
+  return { style };
+}
+
 async function runCommand(
   db: ReturnType<typeof createClient>,
   command: CommandRequest,
@@ -478,6 +506,8 @@ async function runCommand(
       return await executeSetPostPublished(db, command.args);
     case "posts.delete":
       return await executeDeletePost(db, command.args);
+    case "site.set_launcher_style":
+      return await executeSiteSetLauncherStyle(db, command.args, actorUserId);
     default:
       fail(400, "unknown_command", "Unsupported command");
   }
