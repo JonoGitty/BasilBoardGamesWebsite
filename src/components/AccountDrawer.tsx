@@ -40,7 +40,7 @@ function AccountNav({
           {profile.avatarIcon}
         </div>
         <div>
-          <span className="account-drawer__name">{profile.nickname || 'Player'}</span>
+          <span className="account-drawer__name">{user ? (profile.nickname || 'Player') : 'Guest'}</span>
           {user && (
             <span className="account-drawer__email">{user.email}</span>
           )}
