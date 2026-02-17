@@ -706,6 +706,12 @@ body {
   color: var(--text-secondary);
 }
 
+.auth-form__info {
+  font-size: var(--font-size-sm);
+  color: #34d399;
+  margin-bottom: var(--space-md);
+}
+
 .auth-form__error {
   font-size: var(--font-size-sm);
   color: #fb7185;

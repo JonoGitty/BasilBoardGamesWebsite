@@ -2,12 +2,13 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { getEmailRedirectUrl } from '../lib/authRedirect';
 import { track } from '../analytics/track';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null; confirmationSent?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
@@ -38,9 +39,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(async (email: string, password: string) => {
     if (!supabase) return { error: 'Auth is not configured' };
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: getEmailRedirectUrl() },
+    });
     if (!error) track('auth_sign_up', { method: 'email' });
-    return { error: error?.message ?? null };
+
+    // Supabase returns a user with no session when email confirmation is required
+    const confirmationSent = !error && !!data.user && !data.session;
+    return { error: error?.message ?? null, confirmationSent };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {

@@ -6,6 +6,7 @@
 |--------|-------------|
 | `VITE_SUPABASE_URL` | Supabase project URL (public, baked into client bundle) |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key (public, baked into client bundle) |
+| `VITE_PUBLIC_APP_URL` | Production app URL for auth email redirects (e.g. `https://basilboardgames.co.uk`) |
 
 These are set in **Settings > Secrets and variables > Actions**.
 
@@ -41,8 +42,23 @@ supabase functions deploy rotation-run --no-verify-jwt
 2. Source: **GitHub Actions**
 3. The deploy workflow handles the rest
 
+## Supabase Auth URL Configuration
+
+In the Supabase dashboard under **Authentication > URL Configuration**:
+
+| Setting | Value |
+|---------|-------|
+| **Site URL** | `https://basilboardgames.co.uk/` |
+| **Redirect URLs** | `https://basilboardgames.co.uk/` |
+| | `http://localhost:5173/` |
+| | `http://localhost:4173/` |
+
+The Site URL is the default redirect for confirmation emails. The additional
+redirect URLs are the allowed targets for `emailRedirectTo` in the signup call.
+
 ## Environment Notes
 
-- The `base` path in `vite.config.ts` is set to `/BasilBoardGamesWebsite/` for GitHub Pages
+- The `base` path in `vite.config.ts` is set to `/` for the custom domain
 - Supabase env vars are injected at build time via `VITE_` prefix
+- `VITE_PUBLIC_APP_URL` controls email confirmation redirect links
 - The app gracefully degrades when Supabase is unreachable (fallback data)

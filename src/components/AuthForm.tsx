@@ -10,11 +10,13 @@ export default function AuthForm({ onBack }: { onBack: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setBusy(true);
 
     const result = mode === 'sign-in'
@@ -25,9 +27,8 @@ export default function AuthForm({ onBack }: { onBack: () => void }) {
 
     if (result.error) {
       setError(result.error);
-    } else if (mode === 'sign-up') {
-      setError(null);
-      // Supabase may require email confirmation
+    } else if (mode === 'sign-up' && 'confirmationSent' in result && result.confirmationSent) {
+      setInfo('Check your email to confirm your account.');
       setMode('sign-in');
     }
   };
@@ -72,6 +73,7 @@ export default function AuthForm({ onBack }: { onBack: () => void }) {
           />
         </label>
 
+        {info && <p className="auth-form__info">{info}</p>}
         {error && <p className="auth-form__error">{error}</p>}
 
         <button
