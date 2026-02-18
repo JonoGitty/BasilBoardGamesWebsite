@@ -16,7 +16,12 @@ export function useWhatsNewFeed(): WhatsNewPost[] {
 
     fetchPublishedFeed().then((fetched) => {
       if (!cancelled && fetched.length > 0) {
-        setPosts(fetched);
+        // Keep fallback entries that do not exist in DB so local announcements
+        // remain visible if DB content is incomplete.
+        const fetchedIds = new Set(fetched.map((p) => p.id));
+        const merged = [...fetched, ...FALLBACK.filter((p) => !fetchedIds.has(p.id))]
+          .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+        setPosts(merged);
       }
     });
 

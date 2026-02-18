@@ -25,6 +25,24 @@ interface CommandEnvelope<TResult> {
   error?: string;
 }
 
+function isEdgeFunctionUnavailable(msg: string): boolean {
+  const lower = msg.toLowerCase();
+  return (
+    lower.includes('non-2xx') ||
+    lower.includes('failed to send') ||
+    lower.includes('network') ||
+    lower.includes('fetch failed') ||
+    lower.includes('unknown_command')
+  );
+}
+
+function normalizeEdgeFunctionError(msg: string): string {
+  if (isEdgeFunctionUnavailable(msg)) {
+    return 'Admin command endpoint is unavailable. Falling back to direct database update.';
+  }
+  return msg;
+}
+
 async function invokeAdminCommand<TResult>(
   name: AdminCommandName,
   args: Record<string, unknown>,
@@ -46,10 +64,10 @@ async function invokeAdminCommand<TResult>(
     if (resp && typeof resp.json === 'function') {
       try {
         const body = await resp.json();
-        return { ok: false, error: body?.error ?? error.message };
+        return { ok: false, error: normalizeEdgeFunctionError(body?.error ?? error.message) };
       } catch { /* fall through */ }
     }
-    return { ok: false, error: error.message };
+    return { ok: false, error: normalizeEdgeFunctionError(error.message) };
   }
 
   if (!data || typeof data !== 'object') {
@@ -179,10 +197,28 @@ export async function publishPost(
     postId,
     published: true,
   });
-  if (!cmd.ok) {
-    return { ok: false, error: cmd.error ?? 'Publish failed' };
+  if (cmd.ok) {
+    return { ok: true };
   }
-  return { ok: true };
+
+  // Resilience fallback: direct table update under admin RLS.
+  if (supabase && isEdgeFunctionUnavailable(cmd.error ?? '')) {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ published: true, published_at: now, updated_at: now })
+      .eq('id', postId)
+      .select('id')
+      .maybeSingle();
+    if (!error && data) {
+      return { ok: true };
+    }
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: false, error: `Post "${postId}" was not found` };
+  }
+  return { ok: false, error: cmd.error ?? 'Publish failed' };
 }
 
 /** Unpublish a post. */
@@ -193,10 +229,28 @@ export async function unpublishPost(
     postId,
     published: false,
   });
-  if (!cmd.ok) {
-    return { ok: false, error: cmd.error ?? 'Unpublish failed' };
+  if (cmd.ok) {
+    return { ok: true };
   }
-  return { ok: true };
+
+  // Resilience fallback: direct table update under admin RLS.
+  if (supabase && isEdgeFunctionUnavailable(cmd.error ?? '')) {
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('posts')
+      .update({ published: false, published_at: null, updated_at: now })
+      .eq('id', postId)
+      .select('id')
+      .maybeSingle();
+    if (!error && data) {
+      return { ok: true };
+    }
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: false, error: `Post "${postId}" was not found` };
+  }
+  return { ok: false, error: cmd.error ?? 'Unpublish failed' };
 }
 
 /** Delete a post. */
@@ -312,10 +366,32 @@ export async function updateFeedbackStatus(
     'feedback.update_status',
     args,
   );
-  if (!cmd.ok) {
-    return { ok: false, error: friendlyFeedbackError(cmd.error ?? 'Update failed') };
+  if (cmd.ok) {
+    return { ok: true };
   }
-  return { ok: true };
+
+  // Resilience fallback: direct table update under admin RLS.
+  if (supabase && isEdgeFunctionUnavailable(cmd.error ?? '')) {
+    const update: Record<string, unknown> = { status };
+    if (adminNote !== undefined) {
+      update.admin_note = adminNote;
+    }
+    const { data, error } = await supabase
+      .from('feedback')
+      .update(update)
+      .eq('id', feedbackId)
+      .select('id')
+      .maybeSingle();
+    if (!error && data) {
+      return { ok: true };
+    }
+    if (error) {
+      return { ok: false, error: friendlyFeedbackError(error.message) };
+    }
+    return { ok: false, error: 'Feedback item not found. It may have been deleted.' };
+  }
+
+  return { ok: false, error: friendlyFeedbackError(cmd.error ?? 'Update failed') };
 }
 
 // Exported for testing
