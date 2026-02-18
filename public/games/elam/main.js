@@ -533,12 +533,20 @@ function renderSupplies() {
     const card = document.createElement("div");
     card.className = "supply-card";
     const sup = state.supplies[p.id];
-    card.innerHTML = `
-      <div class="player">${p.name} (${p.side})</div>
-      <div class="supply-row"><span>Circle</span><span>${sup.circle}</span></div>
-      <div class="supply-row"><span>Triangle</span><span>${sup.triangle}</span></div>
-      <div class="supply-row"><span>Square</span><span>${sup.square}</span></div>
-    `;
+    const playerDiv = document.createElement("div");
+    playerDiv.className = "player";
+    playerDiv.textContent = `${p.name} (${p.side})`;
+    card.appendChild(playerDiv);
+    for (const [label, val] of [["Circle", sup.circle], ["Triangle", sup.triangle], ["Square", sup.square]]) {
+      const row = document.createElement("div");
+      row.className = "supply-row";
+      const lbl = document.createElement("span");
+      lbl.textContent = label;
+      const v = document.createElement("span");
+      v.textContent = String(val);
+      row.append(lbl, v);
+      card.appendChild(row);
+    }
     supplyListEl.appendChild(card);
   });
 }
