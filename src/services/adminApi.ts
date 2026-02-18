@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { AdminCommandName, AdminGameRow, GameUpdatePayload, PostRow, PostPayload } from '../types/admin';
+import type { AdminCommandName, AdminGameRow, GameUpdatePayload, PostRow, PostPayload, FeedbackRow } from '../types/admin';
 import type { AdminPost } from '../types/whatsNew';
 
 // ── Mapping helpers ──────────────────────────────────────
@@ -225,6 +225,53 @@ export async function setLauncherStyle(
   );
   if (!cmd.ok) {
     return { ok: false, error: cmd.error ?? 'Failed to set launcher style' };
+  }
+  return { ok: true };
+}
+
+// ── Feedback ──────────────────────────────────────────────
+
+/** Fetch feedback entries (admin RLS allows SELECT). */
+export async function fetchFeedback(
+  filters?: { status?: string; gameId?: string },
+): Promise<{ data: FeedbackRow[]; error?: string }> {
+  if (!supabase) return { data: [], error: 'Supabase not configured' };
+
+  let query = supabase
+    .from('feedback')
+    .select('id, created_at, game_id, page, source, feedback_text, context_json, client_feedback_id, ip_hash, status, admin_note')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (filters?.status) {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.gameId) {
+    query = query.eq('game_id', filters.gameId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) return { data: [], error: error.message };
+  if (!data) return { data: [], error: 'No data returned' };
+  return { data: data as FeedbackRow[] };
+}
+
+/** Update feedback status via admin command. */
+export async function updateFeedbackStatus(
+  feedbackId: number,
+  status: string,
+  adminNote?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const args: Record<string, unknown> = { feedbackId, status };
+  if (adminNote !== undefined) args.adminNote = adminNote;
+
+  const cmd = await invokeAdminCommand<{ feedback: FeedbackRow }>(
+    'feedback.update_status',
+    args,
+  );
+  if (!cmd.ok) {
+    return { ok: false, error: cmd.error ?? 'Update failed' };
   }
   return { ok: true };
 }

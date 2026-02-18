@@ -2373,8 +2373,14 @@ function isPermanentFeedbackError(status) {
   return status >= 400 && status < 500 && status !== 429;
 }
 
+function getFeedbackIngestUrl() {
+  return (typeof window !== "undefined" && window.BASIL_FEEDBACK_INGEST_URL) || "";
+}
+
 async function postFeedbackPayload(payload) {
-  const resp = await fetch("/api/feedback", {
+  const url = getFeedbackIngestUrl();
+  if (!url) throw new Error("Feedback endpoint not configured");
+  const resp = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -2473,6 +2479,7 @@ async function sendAnonymousFeedback() {
   const payload = {
     clientFeedbackId: makeClientFeedbackId(),
     feedback,
+    gameId: "elam",
     page: "local",
     source: "ui",
     context: buildLocalFeedbackContext(),

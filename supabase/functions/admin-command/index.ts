@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const POST_CATEGORIES = new Set(["patch", "experiment", "announcement"]);
 const VALID_LAUNCHER_STYLES = new Set(["classic", "craft-desk", "netflix"]);
 const VALID_GAME_STATUSES = new Set(["prototype", "beta", "polished", "live"]);
+const VALID_FEEDBACK_STATUSES = new Set(["new", "reviewed", "resolved", "dismissed"]);
 const VALID_COMMANDS = [
   "games.patch",
   "games.set_active_lineup",
@@ -12,6 +13,7 @@ const VALID_COMMANDS = [
   "posts.set_published",
   "posts.delete",
   "site.set_launcher_style",
+  "feedback.update_status",
 ] as const;
 
 type CommandName = (typeof VALID_COMMANDS)[number];
@@ -520,6 +522,58 @@ async function executeSiteSetLauncherStyle(
   return { style };
 }
 
+async function executeFeedbackUpdateStatus(
+  db: ReturnType<typeof createClient>,
+  args: Record<string, unknown>,
+) {
+  const feedbackIdRaw = args.feedbackId;
+  if (typeof feedbackIdRaw !== "number" || !Number.isInteger(feedbackIdRaw)) {
+    fail(400, "invalid_args", 'Expected "feedbackId" to be an integer');
+  }
+  const feedbackId = feedbackIdRaw;
+
+  const status = readStringField(args, "status", 20);
+  if (!VALID_FEEDBACK_STATUSES.has(status)) {
+    fail(
+      400,
+      "invalid_args",
+      `Invalid feedback status "${status}". Must be one of: ${[...VALID_FEEDBACK_STATUSES].join(", ")}`,
+    );
+  }
+
+  const update: Record<string, unknown> = { status };
+
+  if ("adminNote" in args) {
+    if (args.adminNote === null) {
+      update.admin_note = null;
+    } else if (typeof args.adminNote === "string") {
+      const note = args.adminNote.trim();
+      if (note.length > 500) {
+        fail(400, "invalid_args", '"adminNote" exceeds max length 500');
+      }
+      update.admin_note = note || null;
+    } else {
+      fail(400, "invalid_args", 'Expected "adminNote" to be a string or null');
+    }
+  }
+
+  const { data, error } = await db
+    .from("feedback")
+    .update(update)
+    .eq("id", feedbackId)
+    .select("id, status, admin_note")
+    .maybeSingle();
+
+  if (error) {
+    fail(400, "feedback_update_failed", error.message);
+  }
+  if (!data) {
+    fail(404, "feedback_not_found", `Feedback "${feedbackId}" was not found`);
+  }
+
+  return { feedback: data };
+}
+
 async function runCommand(
   db: ReturnType<typeof createClient>,
   command: CommandRequest,
@@ -540,6 +594,8 @@ async function runCommand(
       return await executeDeletePost(db, command.args);
     case "site.set_launcher_style":
       return await executeSiteSetLauncherStyle(db, command.args, actorUserId);
+    case "feedback.update_status":
+      return await executeFeedbackUpdateStatus(db, command.args);
     default:
       fail(400, "unknown_command", "Unsupported command");
   }

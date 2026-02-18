@@ -20,10 +20,10 @@ describe('games manifest', () => {
     expect(interrogate!.url).toContain('games/interrogate/index.html');
   });
 
-  it('elam has a url pointing to the external service', () => {
+  it('elam has a url pointing to the local static bundle', () => {
     const elam = GAMES.find((g) => g.id === 'elam');
     expect(elam).toBeDefined();
-    expect(elam!.url).toMatch(/^https?:\/\//);
+    expect(elam!.url).toContain('games/elam/index.html');
   });
 
   it('all games have required fields', () => {

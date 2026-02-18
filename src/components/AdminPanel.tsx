@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { Profile } from '../types/profile';
 import AdminGamesTab from './AdminGamesTab';
 import AdminPostsTab from './AdminPostsTab';
+import AdminFeedbackTab from './AdminFeedbackTab';
 import MetricsTab from './MetricsTab';
 import AdminSettingsTab from './AdminSettingsTab';
 
-type AdminTab = 'games' | 'posts' | 'metrics' | 'settings';
+type AdminTab = 'games' | 'posts' | 'feedback' | 'metrics' | 'settings';
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -40,6 +41,12 @@ export default function AdminPanel({ onBack, profile, onUpdateProfile }: AdminPa
             Posts
           </button>
           <button
+            className={`admin__tab${tab === 'feedback' ? ' admin__tab--active' : ''}`}
+            onClick={() => setTab('feedback')}
+          >
+            Feedback
+          </button>
+          <button
             className={`admin__tab${tab === 'metrics' ? ' admin__tab--active' : ''}`}
             onClick={() => setTab('metrics')}
           >
@@ -56,6 +63,7 @@ export default function AdminPanel({ onBack, profile, onUpdateProfile }: AdminPa
       <div className="admin__content">
         {tab === 'games' && <AdminGamesTab />}
         {tab === 'posts' && <AdminPostsTab />}
+        {tab === 'feedback' && <AdminFeedbackTab />}
         {tab === 'metrics' && <MetricsTab />}
         {tab === 'settings' && <AdminSettingsTab profile={profile} onUpdateProfile={onUpdateProfile} />}
       </div>

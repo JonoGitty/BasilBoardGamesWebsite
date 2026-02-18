@@ -54,6 +54,21 @@ export interface PostPayload {
   category: PostCategory;
 }
 
+/** Row shape returned from Supabase feedback table for admin use. */
+export interface FeedbackRow {
+  id: number;
+  created_at: string;
+  game_id: string | null;
+  page: string;
+  source: string;
+  feedback_text: string;
+  context_json: Record<string, unknown>;
+  client_feedback_id: string;
+  ip_hash: string | null;
+  status: 'new' | 'reviewed' | 'resolved' | 'dismissed';
+  admin_note: string | null;
+}
+
 /** Deterministic backend command names for admin operations. */
 export type AdminCommandName =
   | 'games.patch'
@@ -62,4 +77,5 @@ export type AdminCommandName =
   | 'posts.patch'
   | 'posts.set_published'
   | 'posts.delete'
-  | 'site.set_launcher_style';
+  | 'site.set_launcher_style'
+  | 'feedback.update_status';

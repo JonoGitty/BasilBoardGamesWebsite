@@ -16,7 +16,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
       </header>
 
       <div className="privacy__content">
-        <p className="privacy__updated">Last updated: February 2026</p>
+        <p className="privacy__updated">Last updated: February 18, 2026</p>
 
         <section className="privacy__section">
           <h2>1. Who We Are</h2>
@@ -66,7 +66,21 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Approximate country or region (derived from IP address)</li>
           </ul>
 
-          <h3>3.3 What We Do NOT Collect</h3>
+          <h3>3.3 Feedback</h3>
+          <p>
+            If you choose to submit anonymous feedback through our in-game feedback button:
+          </p>
+          <ul>
+            <li>Your feedback text (up to 500 characters)</li>
+            <li>Game context at the time of submission (game state, settings &mdash; no personal data)</li>
+            <li>A one-way hash of your IP address, used solely for rate limiting (the raw IP is not stored)</li>
+          </ul>
+          <p>
+            Feedback is fully anonymous &mdash; no account or login is required, and we cannot
+            link feedback to any individual user.
+          </p>
+
+          <h3>3.4 What We Do NOT Collect</h3>
           <ul>
             <li>Precise location or GPS data</li>
             <li>Contacts, camera, or microphone data</li>
@@ -125,6 +139,15 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>
               <strong>basil_telemetry_queue</strong> &mdash; queued analytics events (flushed
               periodically)
+            </li>
+            <li>
+              <strong>basil_feedback_queue</strong> &mdash; queued anonymous feedback submissions
+              from hub pages (flushed when online)
+            </li>
+            <li>
+              <strong>elam_feedback_queue_local_v1</strong>,{' '}
+              <strong>elam_feedback_queue_online_v1</strong> &mdash; queued feedback from Elam
+              local and online modes
             </li>
             <li>
               <strong>Supabase auth tokens</strong> &mdash; login session management
@@ -190,6 +213,10 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>
               <strong>Analytics events:</strong> aggregated and anonymised; raw events retained
               for up to 90 days
+            </li>
+            <li>
+              <strong>Feedback:</strong> anonymous feedback submissions retained for up to
+              12 months, then deleted
             </li>
             <li>
               <strong>Deletion requests:</strong> processed within 30 days
