@@ -25,12 +25,13 @@ export default function GameModeSelector({ game, onSelect, onClose }: GameModeSe
               {game.emoji}
             </span>
             <span className="mode-selector__label">Play vs Bots</span>
-            <span className="mode-selector__desc">Instant, offline, always available</span>
+            <span className="mode-selector__desc">Local play — works offline, no server needed</span>
           </button>
           <button
-            className="mode-selector__btn mode-selector__btn--online"
-            onClick={() => onSelect('online')}
+            className="mode-selector__btn mode-selector__btn--online mode-selector__btn--disabled"
+            disabled
           >
+            <span className="mode-selector__badge">Coming Soon</span>
             <span className="mode-selector__icon" aria-hidden="true">
               {game.emoji}
             </span>

@@ -27,19 +27,27 @@ function badgeFromStatus(status: GameStatus): string | undefined {
   }
 }
 
-/** Lookup for onlineUrl values that are code-defined, not DB-stored. */
-const onlineUrlByGameId: Record<string, string | undefined> = Object.fromEntries(
-  GAMES.filter((g) => g.onlineUrl).map((g) => [g.id, g.onlineUrl]),
+/**
+ * Lookup for code-defined fields that should override DB values.
+ * URLs use import.meta.env.BASE_URL and env var resolution, so they
+ * must always come from the hardcoded manifest, not from Supabase.
+ */
+const codeOverrides: Record<string, Pick<Game, 'url' | 'onlineUrl'>> = Object.fromEntries(
+  GAMES.filter((g) => g.url || g.onlineUrl).map((g) => [
+    g.id,
+    { url: g.url, onlineUrl: g.onlineUrl },
+  ]),
 );
 
 function toGame(row: GameRow): Game {
+  const overrides = codeOverrides[row.id];
   return {
     id: row.id,
     title: row.title,
     description: row.description,
     emoji: row.emoji,
-    url: row.url ?? undefined,
-    onlineUrl: onlineUrlByGameId[row.id],
+    url: overrides?.url ?? row.url ?? undefined,
+    onlineUrl: overrides?.onlineUrl,
     status: row.status,
     badge: badgeFromStatus(row.status),
     sortOrder: row.sort_order,

@@ -2,16 +2,13 @@
  * Resolve the Elam (Triarch) local-play URL.
  *
  * Points to the static build imported into public/games/elam/.
- * In dev, falls back to the local Triarch dev server.
+ * Vite serves public/ in dev, so the same path works everywhere.
  */
 export function getElamUrl(): string {
   const explicit = import.meta.env.VITE_ELAM_URL;
   if (explicit) return explicit;
 
-  const isDev = import.meta.env.DEV;
-  return isDev
-    ? 'http://localhost:8080/index.html'
-    : import.meta.env.BASE_URL + 'games/elam/index.html';
+  return import.meta.env.BASE_URL + 'games/elam/index.html';
 }
 
 /**
