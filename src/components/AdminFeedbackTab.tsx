@@ -163,7 +163,11 @@ export default function AdminFeedbackTab() {
         </button>
       </div>
 
-      {error && <p className="admin__error">{error}</p>}
+      {error && (
+        <div className={error.includes('migration') ? 'admin__setup-notice' : 'admin__error-wrap'}>
+          <p className="admin__error">{error}</p>
+        </div>
+      )}
       {loading && <p className="admin__loading">Loading feedback...</p>}
 
       {!loading && (

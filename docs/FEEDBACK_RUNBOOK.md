@@ -36,6 +36,8 @@ Admin Panel → Feedback tab (read via RLS, status updates via admin-command)
 
 ## Deployment
 
+**Deploy order is critical.** Follow these steps in sequence:
+
 ### 1. Run Migration
 
 Execute `014_feedback.sql` via the Supabase dashboard SQL editor or CLI:
@@ -44,7 +46,19 @@ Execute `014_feedback.sql` via the Supabase dashboard SQL editor or CLI:
 supabase db push
 ```
 
-### 2. Deploy Edge Function
+### 2. Reload Supabase Schema Cache
+
+After applying the migration, PostgREST (Supabase's REST layer) must refresh its
+schema cache before the `feedback` table is accessible via the client SDK.
+
+- **Dashboard:** Project Settings > API > click **Reload Schema Cache**
+- **CLI:** `supabase db reset` (local dev) or wait ~60s for automatic refresh
+
+> **Common issue:** If the admin panel shows *"Could not find the table 'public.feedback'
+> in the schema cache"*, this means the schema cache has not been reloaded after migration.
+> Reload it as described above, then refresh the admin page.
+
+### 3. Deploy Edge Function
 
 ```bash
 supabase functions deploy feedback-ingest --no-verify-jwt
@@ -53,7 +67,7 @@ supabase functions deploy feedback-ingest --no-verify-jwt
 > The `--no-verify-jwt` flag is required because feedback is submitted anonymously
 > without authentication tokens.
 
-### 3. Set Secrets
+### 4. Set Secrets
 
 ```bash
 supabase secrets set FEEDBACK_SALT="your-random-salt-here"
@@ -72,7 +86,7 @@ supabase secrets set FEEDBACK_RATE_PER_MINUTE=30
 supabase secrets set FEEDBACK_RATE_PER_DAY=2000
 ```
 
-### 4. Verify
+### 5. Verify
 
 ```bash
 # Replace YOUR_PROJECT_REF with your Supabase project reference
@@ -155,6 +169,15 @@ Status workflow: `new` → `reviewed` → `resolved` or `dismissed`
 
 ## Troubleshooting
 
+### "Could not find the table 'public.feedback' in the schema cache"
+
+This is the most common issue after initial setup:
+
+1. Verify the `014_feedback.sql` migration has been applied (check Supabase dashboard > Table Editor)
+2. Reload the PostgREST schema cache: Project Settings > API > **Reload Schema Cache**
+3. Wait 5-10 seconds, then refresh the admin panel
+4. If the issue persists, check that RLS is enabled and admin SELECT policy exists
+
 ### Feedback not appearing in admin panel
 
 1. Check browser console for network errors
@@ -189,3 +212,23 @@ Feedback is retained for 12 months per the privacy policy. To clean up old feedb
 ```sql
 DELETE FROM feedback WHERE created_at < now() - interval '12 months';
 ```
+
+## Related Migrations
+
+### Privacy Policy Consent (profiles table)
+
+Add privacy policy acceptance tracking to the `profiles` table. Apply via Supabase
+SQL editor, then reload schema cache:
+
+```sql
+-- Add privacy policy acceptance fields to profiles
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS privacy_policy_accepted_at timestamptz,
+  ADD COLUMN IF NOT EXISTS privacy_policy_version text;
+
+COMMENT ON COLUMN public.profiles.privacy_policy_accepted_at IS 'Timestamp when user accepted the privacy policy during signup';
+COMMENT ON COLUMN public.profiles.privacy_policy_version IS 'Version string of the privacy policy accepted (e.g. 2026-02-18)';
+```
+
+These columns are nullable so existing users are unaffected. New signups will have
+both fields populated automatically.

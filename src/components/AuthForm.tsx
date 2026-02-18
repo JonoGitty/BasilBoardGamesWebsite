@@ -4,11 +4,12 @@ import { useAuth } from '../auth/AuthContext';
 
 type Mode = 'sign-in' | 'sign-up';
 
-export default function AuthForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn?: () => void }) {
+export default function AuthForm({ onBack, onSignedIn, onOpenPrivacy }: { onBack: () => void; onSignedIn?: () => void; onOpenPrivacy?: () => void }) {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,7 +22,7 @@ export default function AuthForm({ onBack, onSignedIn }: { onBack: () => void; o
 
     const result = mode === 'sign-in'
       ? await signIn(email, password)
-      : await signUp(email, password);
+      : await signUp(email, password, privacyAccepted);
 
     setBusy(false);
 
@@ -74,6 +75,26 @@ export default function AuthForm({ onBack, onSignedIn }: { onBack: () => void; o
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
+
+        {mode === 'sign-up' && (
+          <label className="auth-form__checkbox-field">
+            <input
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            />
+            <span className="auth-form__checkbox-label">
+              I have read and agree to the{' '}
+              <button
+                type="button"
+                className="auth-form__policy-link"
+                onClick={() => onOpenPrivacy?.()}
+              >
+                Privacy Policy
+              </button>
+            </span>
+          </label>
+        )}
 
         {info && <p className="auth-form__info">{info}</p>}
         {error && <p className="auth-form__error">{error}</p>}

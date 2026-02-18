@@ -1092,6 +1092,7 @@ function enforceWinFromCarrierPosition() {
     state.gameOver = true;
     state.winner = `${player.name} wins by reaching the opposite edge with the flag!`;
     state.lastMessage = state.winner;
+    trackGameEnd();
   }
 }
 
@@ -1104,12 +1105,17 @@ function checkWin(playerId, loc) {
     state.gameOver = true;
     state.winner = `${player.name} wins by reaching the opposite edge with the flag!`;
     state.lastMessage = state.winner;
+    trackGameEnd();
   }
 }
 
 function nextTurn() {
+  gameActionCount += 1;
   enforceWinFromCarrierPosition();
-  if (state.gameOver) return;
+  if (state.gameOver) {
+    render();
+    return;
+  }
   // Track how long the current flag carrier sits in the zone.
   const current = currentPlayer();
   if (state.flagZone.stack && state.flagZone.stack.playerId === current.id) {
@@ -1938,6 +1944,7 @@ function resetGame() {
   logDev(
     `Reset game: mode=${state.gameMode} localOpponents=${config.localOpponents} bots=${config.botCount} difficulty=${state.aiDifficulty} players=${state.players.length} [${playerSummary}] setupMode=${state.setupMode}`
   );
+  trackGameStart();
   render();
   maybeRunAI();
 }
@@ -2317,6 +2324,7 @@ setupPlaytestGate();
 setupEvents();
 resetGame();
 initFeedbackQueue();
+initTelemetryQueue();
 
 // ---------- Dev log (file-based) ----------
 function logDev(message) {
@@ -2570,6 +2578,113 @@ function buildLocalFeedbackContext() {
     supplies,
     lastMessage: state.lastMessage || "",
   };
+}
+
+// ---------- Telemetry ----------
+const TELEMETRY_QUEUE_KEY = "elam_telemetry_queue_local_v1";
+const TELEMETRY_QUEUE_MAX = 100;
+const TELEMETRY_FLUSH_INTERVAL_MS = 30000;
+let telemetryFlushTimer = null;
+let gameStartedAt = null;
+let gameActionCount = 0;
+
+function getEventsIngestUrl() {
+  return (typeof window !== "undefined" && window.BASIL_EVENTS_INGEST_URL) || "";
+}
+
+function loadTelemetryQueue() {
+  try {
+    const raw = localStorage.getItem(TELEMETRY_QUEUE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveTelemetryQueue(queue) {
+  try {
+    localStorage.setItem(TELEMETRY_QUEUE_KEY, JSON.stringify(queue));
+    return true;
+  } catch { return false; }
+}
+
+function enqueueTelemetryEvent(name, payload) {
+  const event = {
+    id: crypto.randomUUID ? crypto.randomUUID() : `evt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`,
+    name,
+    payload,
+    timestamp: Date.now(),
+  };
+  const queue = loadTelemetryQueue();
+  queue.push(event);
+  while (queue.length > TELEMETRY_QUEUE_MAX) queue.shift();
+  saveTelemetryQueue(queue);
+  return event;
+}
+
+async function flushTelemetryQueue() {
+  const url = getEventsIngestUrl();
+  if (!url) return;
+  const queue = loadTelemetryQueue();
+  if (queue.length === 0) return;
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ events: queue }),
+    });
+    if (resp.ok) {
+      saveTelemetryQueue([]);
+    }
+  } catch { /* will retry next flush */ }
+}
+
+function initTelemetryQueue() {
+  if (telemetryFlushTimer) return;
+  telemetryFlushTimer = setInterval(() => flushTelemetryQueue(), TELEMETRY_FLUSH_INTERVAL_MS);
+  window.addEventListener("beforeunload", () => flushTelemetryQueue());
+  window.addEventListener("online", () => flushTelemetryQueue());
+  flushTelemetryQueue();
+}
+
+function trackGameStart() {
+  if (!state) return;
+  gameStartedAt = Date.now();
+  gameActionCount = 0;
+  const humanCount = state.players.filter((p) => !p.isAI).length;
+  const botCount = state.players.filter((p) => p.isAI).length;
+  enqueueTelemetryEvent("game_start", {
+    gameId: "elam",
+    mode: "local",
+    setupMode: state.setupMode,
+    playerCount: state.players.length,
+    humanCount,
+    botCount,
+    aiDifficulty: state.aiDifficulty || "normal",
+    players: state.players.map((p) => ({
+      side: p.side,
+      isAI: !!p.isAI,
+    })),
+  });
+}
+
+function trackGameEnd() {
+  if (!state || !state.gameOver) return;
+  const durationMs = gameStartedAt ? Date.now() - gameStartedAt : 0;
+  const winnerPlayer = state.players.find((p) => state.winner && state.winner.includes(p.name));
+  enqueueTelemetryEvent("game_end", {
+    gameId: "elam",
+    mode: "local",
+    durationMs,
+    turnCount: state.current || 0,
+    actionCount: gameActionCount,
+    winner: winnerPlayer
+      ? { side: winnerPlayer.side, isAI: !!winnerPlayer.isAI }
+      : null,
+    playerCount: state.players.length,
+    humanCount: state.players.filter((p) => !p.isAI).length,
+    botCount: state.players.filter((p) => p.isAI).length,
+    aiDifficulty: state.aiDifficulty || "normal",
+  });
+  flushTelemetryQueue();
 }
 
 function assignAiProfiles(players) {

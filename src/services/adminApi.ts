@@ -231,6 +231,22 @@ export async function setLauncherStyle(
 
 // ── Feedback ──────────────────────────────────────────────
 
+/** Known error patterns for missing/uncached feedback table. */
+const FEEDBACK_TABLE_MISSING_PATTERNS = [
+  'Could not find the',
+  'relation "public.feedback" does not exist',
+  'schema cache',
+];
+
+function isFeedbackTableMissing(msg: string): boolean {
+  return FEEDBACK_TABLE_MISSING_PATTERNS.some((p) => msg.includes(p));
+}
+
+const FEEDBACK_TABLE_SETUP_MSG =
+  'The feedback table has not been created yet, or the Supabase schema cache is stale. ' +
+  'Run the 014_feedback.sql migration via the Supabase SQL editor, then reload the schema cache ' +
+  '(Project Settings > API > Reload Schema Cache). See docs/FEEDBACK_RUNBOOK.md for details.';
+
 /** Fetch feedback entries (admin RLS allows SELECT). */
 export async function fetchFeedback(
   filters?: { status?: string; gameId?: string },
@@ -252,7 +268,12 @@ export async function fetchFeedback(
 
   const { data, error } = await query;
 
-  if (error) return { data: [], error: error.message };
+  if (error) {
+    if (isFeedbackTableMissing(error.message)) {
+      return { data: [], error: FEEDBACK_TABLE_SETUP_MSG };
+    }
+    return { data: [], error: error.message };
+  }
   if (!data) return { data: [], error: 'No data returned' };
   return { data: data as FeedbackRow[] };
 }

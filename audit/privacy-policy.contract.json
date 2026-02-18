@@ -24,7 +24,7 @@
       "id": "account_data",
       "label": "Account Data",
       "classification": "personal",
-      "fields": ["email", "hashed_password", "display_name", "nickname_canonical"],
+      "fields": ["email", "hashed_password", "display_name", "nickname_canonical", "privacy_policy_accepted_at", "privacy_policy_version"],
       "storageLocations": ["supabase:auth.users", "supabase:profiles"],
       "legalBasis": "contract",
       "retention": "until_deletion_or_inactivity",
@@ -166,7 +166,9 @@
     "elam_feedback_queue_local_v1": { "category": "feedback", "origin": "elam" },
     "elam_feedback_queue_online_v1": { "category": "feedback", "origin": "elam" },
     "elam_online_session_v1": { "category": "elam_online_session", "origin": "elam" },
-    "elam_playtest_notice_ack_v1": { "category": "playtest_acknowledgment", "origin": "elam" }
+    "elam_playtest_notice_ack_v1": { "category": "playtest_acknowledgment", "origin": "elam" },
+    "elam_telemetry_queue_local_v1": { "category": "analytics_events", "origin": "elam" },
+    "elam_telemetry_queue_online_v1": { "category": "analytics_events", "origin": "elam" }
   },
 
   "sessionStorageKeys": {

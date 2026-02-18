@@ -17,6 +17,9 @@ export interface Profile {
   launcherStyle: LauncherStyle;
 }
 
+/** Privacy policy version string (e.g. "2026-02-18"). Bump on policy changes. */
+export const CURRENT_PRIVACY_POLICY_VERSION = '2026-02-18';
+
 export const AVATAR_ICONS = [
   '\u{1F3B2}', // dice
   '\u{1F0CF}', // joker

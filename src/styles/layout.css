@@ -763,6 +763,35 @@ body {
   text-decoration: underline;
 }
 
+.auth-form__checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  cursor: pointer;
+}
+.auth-form__checkbox-field input[type="checkbox"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.auth-form__checkbox-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.auth-form__policy-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+.auth-form__policy-link:hover {
+  opacity: 0.8;
+}
+
 /* Auth-aware drawer tweaks */
 .account-drawer__email {
   display: block;
@@ -1050,6 +1079,22 @@ body {
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-md);
+}
+
+.admin__setup-notice {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.admin__setup-notice .admin__error {
+  color: #fbbf24;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 /* Game row */

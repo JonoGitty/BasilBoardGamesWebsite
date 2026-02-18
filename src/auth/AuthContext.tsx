@@ -4,11 +4,12 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { getEmailRedirectUrl } from '../lib/authRedirect';
 import { track } from '../analytics/track';
+import { CURRENT_PRIVACY_POLICY_VERSION } from '../types/profile';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: string | null; confirmationSent?: boolean }>;
+  signUp: (email: string, password: string, privacyAccepted: boolean) => Promise<{ error: string | null; confirmationSent?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
@@ -36,15 +37,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, privacyAccepted: boolean) => {
     if (!supabase) return { error: 'Auth is not configured' };
+    if (!privacyAccepted) return { error: 'You must accept the privacy policy to create an account.' };
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: getEmailRedirectUrl() },
+      options: {
+        emailRedirectTo: getEmailRedirectUrl(),
+        data: {
+          privacy_policy_accepted_at: new Date().toISOString(),
+          privacy_policy_version: CURRENT_PRIVACY_POLICY_VERSION,
+        },
+      },
     });
     if (!error) track('auth_sign_up', { method: 'email' });
+
+    // Persist privacy acceptance to the profiles table (fire-and-forget)
+    if (!error && data.user) {
+      supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          privacy_policy_accepted_at: new Date().toISOString(),
+          privacy_policy_version: CURRENT_PRIVACY_POLICY_VERSION,
+        })
+        .then(() => { /* best-effort */ });
+    }
 
     // Supabase returns a user with no session when email confirmation is required
     const confirmationSent = !error && !!data.user && !data.session;

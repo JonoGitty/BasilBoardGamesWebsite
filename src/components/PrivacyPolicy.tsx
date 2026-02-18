@@ -150,6 +150,11 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               local and online modes
             </li>
             <li>
+              <strong>elam_telemetry_queue_local_v1</strong>,{' '}
+              <strong>elam_telemetry_queue_online_v1</strong> &mdash; queued game analytics
+              events from Elam (flushed periodically, consent-gated)
+            </li>
+            <li>
               <strong>Supabase auth tokens</strong> &mdash; login session management
             </li>
           </ul>
