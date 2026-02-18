@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Privacy policy contract — source of truth for what data Basil Board Games collects, stores, and transmits",
+  "version": "1.0.0",
+  "last_reviewed_date": "2026-02-18",
+
+  "scope": {
+    "domains": [
+      "basilboardgames.co.uk",
+      "play.basilboardgames.co.uk",
+      "*.basilboardgames.co.uk"
+    ],
+    "services": [
+      "Static hub (GitHub Pages)",
+      "Static game bundles (public/games/*)",
+      "Elam online (play.basilboardgames.co.uk)",
+      "Supabase edge functions",
+      "Supabase database (PostgreSQL + RLS)"
+    ]
+  },
+
+  "dataCategories": [
+    {
+      "id": "account_data",
+      "label": "Account Data",
+      "classification": "personal",
+      "fields": ["email", "hashed_password", "display_name", "nickname_canonical"],
+      "storageLocations": ["supabase:auth.users", "supabase:profiles"],
+      "legalBasis": "contract",
+      "retention": "until_deletion_or_inactivity",
+      "policySection": "3.1",
+      "notes": "Real names not required"
+    },
+    {
+      "id": "profile_preferences",
+      "label": "Profile Preferences",
+      "classification": "pseudonymous",
+      "fields": ["avatar_icon", "accent_color", "reduced_motion", "analytics_opt_out", "launcher_style"],
+      "storageLocations": ["supabase:profiles", "localStorage:basil_profile"],
+      "legalBasis": "contract",
+      "retention": "until_deletion_or_inactivity",
+      "policySection": "3.1"
+    },
+    {
+      "id": "analytics_events",
+      "label": "Analytics Events",
+      "classification": "pseudonymous",
+      "fields": ["event_id", "user_id", "event_name", "payload", "timestamp"],
+      "storageLocations": ["supabase:events", "localStorage:basil_telemetry_queue"],
+      "legalBasis": "consent",
+      "retention": "90_days_raw",
+      "policySection": "3.2",
+      "notes": "No IP stored. Consent-gated via cookie banner. Opt-out available in Settings."
+    },
+    {
+      "id": "feedback",
+      "label": "Anonymous Feedback",
+      "classification": "anonymous",
+      "fields": ["feedback_text", "game_id", "page", "source", "context_json", "client_feedback_id", "ip_hash"],
+      "storageLocations": [
+        "supabase:feedback",
+        "localStorage:basil_feedback_queue",
+        "localStorage:elam_feedback_queue_local_v1",
+        "localStorage:elam_feedback_queue_online_v1"
+      ],
+      "legalBasis": "legitimate_interest",
+      "retention": "12_months",
+      "policySection": "3.3",
+      "notes": "IP hashed with salt, raw IP not stored. No account required."
+    },
+    {
+      "id": "consent_choice",
+      "label": "Consent Choice",
+      "classification": "anonymous",
+      "fields": ["consent_level"],
+      "storageLocations": ["localStorage:basil_consent"],
+      "legalBasis": "consent",
+      "retention": "persistent_local",
+      "policySection": "6"
+    },
+    {
+      "id": "session_tracking",
+      "label": "Session Tracking",
+      "classification": "anonymous",
+      "fields": ["game_id", "duration_ms", "started_at", "ended_at"],
+      "storageLocations": ["localStorage:basil_sessions", "sessionStorage:basil_active_session"],
+      "legalBasis": "legitimate_interest",
+      "retention": "persistent_local",
+      "policySection": "3.2",
+      "notes": "Local-only, not transmitted to server"
+    },
+    {
+      "id": "game_catalog",
+      "label": "Game Catalog",
+      "classification": "operational",
+      "fields": ["id", "title", "description", "emoji", "url", "pinned", "vault", "enabled", "status", "sort_order"],
+      "storageLocations": ["supabase:games"],
+      "legalBasis": "legitimate_interest",
+      "retention": "indefinite",
+      "policySection": null,
+      "notes": "Public game catalog data, no user data"
+    },
+    {
+      "id": "content_posts",
+      "label": "Content Posts",
+      "classification": "operational",
+      "fields": ["id", "title", "description", "emoji", "category", "published", "published_at", "created_by"],
+      "storageLocations": ["supabase:posts"],
+      "legalBasis": "legitimate_interest",
+      "retention": "indefinite",
+      "policySection": null,
+      "notes": "Public content posts (what's new), admin-authored"
+    },
+    {
+      "id": "rotation_log",
+      "label": "Game Rotation Log",
+      "classification": "operational",
+      "fields": ["triggered_by", "snapshot", "seed", "rotated_at"],
+      "storageLocations": ["supabase:rotation_log"],
+      "legalBasis": "legitimate_interest",
+      "retention": "indefinite",
+      "policySection": null,
+      "notes": "Audit trail for automated game rotation, no user data"
+    },
+    {
+      "id": "admin_audit",
+      "label": "Admin Command Audit Logs",
+      "classification": "operational",
+      "fields": ["command", "actor_id", "args", "success", "error_code", "error_msg"],
+      "storageLocations": ["supabase:admin_command_log"],
+      "legalBasis": "legitimate_interest",
+      "retention": "indefinite",
+      "policySection": null,
+      "notes": "Internal operational data, not user-facing"
+    },
+    {
+      "id": "elam_online_session",
+      "label": "Elam Online Session",
+      "classification": "pseudonymous",
+      "fields": ["room_code", "refresh_token", "seat", "is_host", "display_name"],
+      "storageLocations": ["localStorage:elam_online_session_v1"],
+      "legalBasis": "contract",
+      "retention": "persistent_local",
+      "policySection": "6",
+      "notes": "Local-only session persistence for reconnection"
+    },
+    {
+      "id": "playtest_acknowledgment",
+      "label": "Playtest Notice Acknowledgment",
+      "classification": "anonymous",
+      "fields": ["acknowledged"],
+      "storageLocations": ["localStorage:elam_playtest_notice_ack_v1"],
+      "legalBasis": "legitimate_interest",
+      "retention": "persistent_local",
+      "policySection": "6",
+      "notes": "Simple boolean flag"
+    }
+  ],
+
+  "localStorageKeys": {
+    "basil_profile": { "category": "profile_preferences", "origin": "hub" },
+    "basil_consent": { "category": "consent_choice", "origin": "hub" },
+    "basil_telemetry_queue": { "category": "analytics_events", "origin": "hub" },
+    "basil_feedback_queue": { "category": "feedback", "origin": "hub" },
+    "basil_sessions": { "category": "session_tracking", "origin": "hub" },
+    "elam_feedback_queue_local_v1": { "category": "feedback", "origin": "elam" },
+    "elam_feedback_queue_online_v1": { "category": "feedback", "origin": "elam" },
+    "elam_online_session_v1": { "category": "elam_online_session", "origin": "elam" },
+    "elam_playtest_notice_ack_v1": { "category": "playtest_acknowledgment", "origin": "elam" }
+  },
+
+  "sessionStorageKeys": {
+    "basil_active_session": { "category": "session_tracking", "origin": "hub" }
+  },
+
+  "ingestionEndpoints": [
+    {
+      "id": "events_ingest",
+      "path": "/functions/v1/events-ingest",
+      "method": "POST",
+      "auth": "optional-jwt",
+      "dataCategories": ["analytics_events"]
+    },
+    {
+      "id": "feedback_ingest",
+      "path": "/functions/v1/feedback-ingest",
+      "method": "POST",
+      "auth": "none",
+      "dataCategories": ["feedback"]
+    },
+    {
+      "id": "admin_command",
+      "path": "/functions/v1/admin-command",
+      "method": "POST",
+      "auth": "require-jwt",
+      "dataCategories": ["admin_audit"]
+    },
+    {
+      "id": "profile_sync",
+      "path": "supabase-direct:profiles",
+      "method": "UPSERT",
+      "auth": "require-jwt",
+      "dataCategories": ["account_data", "profile_preferences"]
+    }
+  ],
+
+  "processors": [
+    { "name": "Supabase", "role": "Database + Auth + Edge Functions", "region": "EU" },
+    { "name": "GitHub Pages", "role": "Static site hosting", "region": "Global CDN" },
+    { "name": "Cloudflare", "role": "DNS + Tunnel for game services", "region": "Global" }
+  ],
+
+  "policyFile": "src/components/PrivacyPolicy.tsx",
+  "policyDatePattern": "Last updated: (\\w+ \\d{1,2}, \\d{4})"
+}

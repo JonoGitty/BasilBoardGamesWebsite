@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Security audit configuration for Basil Board Games platform",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-18",
+
+  "repos": {
+    "website": { "path": ".", "label": "BasilBoardGamesWebsite" },
+    "triarch": { "path": "../Triarch", "label": "Triarch (Elam)" }
+  },
+
+  "severityThresholds": {
+    "failOnSeverity": ["critical", "high"],
+    "warnOnSeverity": ["medium"],
+    "infoOnSeverity": ["low"]
+  },
+
+  "checks": {
+    "hardcodedUrls": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Detect hardcoded Supabase project URLs outside approved config/doc files",
+      "approvedFiles": [
+        "site-config.js",
+        "public/site-config.js",
+        "docs/**",
+        "**/*.md",
+        "audit/**",
+        ".claude/**",
+        ".env*"
+      ],
+      "patterns": [
+        "lwqfelwdnnluuiqipryn\\.supabase\\.co"
+      ]
+    },
+
+    "edgeFunctionSecurity": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Verify edge function auth modes, CORS config, and required secrets",
+      "functions": {
+        "feedback-ingest": {
+          "authMode": "no-verify-jwt",
+          "requiredSecrets": ["FEEDBACK_SALT"],
+          "corsAllowedOrigins": "configurable",
+          "notes": "Anonymous endpoint, rate-limited by IP hash"
+        },
+        "events-ingest": {
+          "authMode": "optional-jwt",
+          "requiredSecrets": [],
+          "corsAllowedOrigins": "*",
+          "notes": "Accepts anonymous + authenticated events"
+        },
+        "admin-command": {
+          "authMode": "require-jwt",
+          "requiredSecrets": [],
+          "corsAllowedOrigins": "*",
+          "notes": "Admin role verified server-side"
+        },
+        "rotation-run": {
+          "authMode": "require-service-role",
+          "requiredSecrets": [],
+          "corsAllowedOrigins": "none",
+          "notes": "Internal scheduler only"
+        }
+      }
+    },
+
+    "rlsCheck": {
+      "enabled": true,
+      "severity": "critical",
+      "description": "Verify RLS is enabled on all sensitive tables",
+      "sensitiveTables": [
+        "profiles",
+        "events",
+        "feedback",
+        "admin_command_log",
+        "posts",
+        "games"
+      ]
+    },
+
+    "wildcardCors": {
+      "enabled": true,
+      "severity": "medium",
+      "description": "Detect wildcard CORS where not explicitly approved",
+      "approvedWildcard": [
+        "events-ingest",
+        "admin-command"
+      ]
+    },
+
+    "npmAudit": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Run npm audit for both repos",
+      "failOnSeverity": ["critical", "high"]
+    },
+
+    "riskyPatterns": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Search for eval, innerHTML, and plaintext secret patterns",
+      "patterns": [
+        { "regex": "\\beval\\s*\\(", "label": "eval() usage", "severity": "high" },
+        { "regex": "\\.innerHTML\\s*=", "label": "innerHTML assignment", "severity": "medium" },
+        { "regex": "document\\.write\\s*\\(", "label": "document.write()", "severity": "medium" },
+        { "regex": "(password|secret|api.?key)\\s*[:=]\\s*[\"'][^\"']{8,}", "label": "Possible plaintext secret", "severity": "high" },
+        { "regex": "dangerouslySetInnerHTML", "label": "React dangerouslySetInnerHTML", "severity": "medium" }
+      ],
+      "excludePaths": [
+        "node_modules",
+        "dist",
+        ".git",
+        "audit",
+        ".claude"
+      ]
+    },
+
+    "adminCommandArchitecture": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Verify admin writes still go through admin-command pattern",
+      "directWritePatterns": [
+        { "regex": "\\.from\\(['\"](?:games|posts|feedback)['\"]\\)\\.(?:insert|update|delete|upsert)\\b", "label": "Direct table write outside admin-command" }
+      ],
+      "allowedFiles": [
+        "supabase/functions/admin-command/index.ts",
+        "supabase/functions/feedback-ingest/index.ts",
+        "supabase/functions/events-ingest/index.ts",
+        "supabase/functions/rotation-run/index.ts"
+      ]
+    }
+  },
+
+  "acceptedRisksFile": "audit/accepted-risks.json"
+}

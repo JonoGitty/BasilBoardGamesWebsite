@@ -1,0 +1,42 @@
+[
+  {
+    "check": "riskyPatterns",
+    "file": "website:public/games/elam/main.js:innerHTML assignment",
+    "reason": "Elam game board rendering uses innerHTML for SVG shape generation. All user-supplied data (player names) is sanitized via escapeHtml() before insertion. XSS fix verified in commit 3b15a72.",
+    "expiresAt": "2026-08-18",
+    "addedBy": "audit-baseline",
+    "addedAt": "2026-02-18"
+  },
+  {
+    "check": "riskyPatterns",
+    "file": "triarch:../Triarch/main.js:innerHTML assignment",
+    "reason": "Triarch game board rendering uses innerHTML for SVG shape generation. All user-supplied data is sanitized via escapeHtml(). XSS fix verified in commit 3b15a72.",
+    "expiresAt": "2026-08-18",
+    "addedBy": "audit-baseline",
+    "addedAt": "2026-02-18"
+  },
+  {
+    "check": "riskyPatterns",
+    "file": "triarch:../Triarch/online-client.js:innerHTML assignment",
+    "reason": "Online client board rendering uses innerHTML for SVG shapes. User data sanitized via escapeHtml(). Same controls as main.js.",
+    "expiresAt": "2026-08-18",
+    "addedBy": "audit-baseline",
+    "addedAt": "2026-02-18"
+  },
+  {
+    "check": "riskyPatterns",
+    "file": "website:public/games/interrogate/assets/index-COjYtEr4.js:innerHTML assignment",
+    "reason": "Interrogate game bundle is a pre-built React app. innerHTML/dangerouslySetInnerHTML used in Vite-compiled output for controlled content rendering. Source code reviewed separately.",
+    "expiresAt": "2026-08-18",
+    "addedBy": "audit-baseline",
+    "addedAt": "2026-02-18"
+  },
+  {
+    "check": "riskyPatterns",
+    "file": "website:public/games/interrogate/assets/index-COjYtEr4.js:React dangerouslySetInnerHTML",
+    "reason": "Same as innerHTML entry above. React compiled bundle, not raw user input.",
+    "expiresAt": "2026-08-18",
+    "addedBy": "audit-baseline",
+    "addedAt": "2026-02-18"
+  }
+]

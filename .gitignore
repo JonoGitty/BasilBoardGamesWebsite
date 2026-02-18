@@ -45,6 +45,9 @@ INSPO/
 # Claude Code local state
 .claude/
 
+# Audit generated reports
+audit/out/
+
 # Credentials & secrets
 *.pem
 *.key
