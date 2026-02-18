@@ -612,19 +612,25 @@ function playerById(id) {
   return state.players.find((p) => p.id === id);
 }
 
-function canPlace(player, shape, row, col) {
-  if (isZoneSquare(row, col)) return false;
-  if (!isHomeSquare(player.side, row, col)) return false;
-  if (state.supplies[player.id][shape] <= 0) return false;
+function placementBlockReason(player, shape, row, col) {
+  if (isZoneSquare(row, col)) return "Cannot place on the flag zone.";
+  if (!isHomeSquare(player.side, row, col)) return "Reinforcements can only be placed on your home row.";
+  if (state.supplies[player.id][shape] <= 0) return `No ${shape} pieces left to place.`;
   const target = cellAt(row, col);
-  if (!target) return true;
-  if (target.playerId !== player.id) return false;
-  return target.shape === shape;
+  if (!target) return null;
+  if (target.playerId !== player.id) return "Cannot place on an enemy stack.";
+  if (target.shape !== shape) return "Can only add onto a same-shape friendly stack.";
+  return null;
+}
+
+function canPlace(player, shape, row, col) {
+  return placementBlockReason(player, shape, row, col) === null;
 }
 
 function placePiece(player, shape, row, col) {
-  if (!canPlace(player, shape, row, col)) {
-    state.lastMessage = "Placement not allowed on that square.";
+  const blockedBy = placementBlockReason(player, shape, row, col);
+  if (blockedBy) {
+    state.lastMessage = blockedBy;
     return false;
   }
   const target = cellAt(row, col);
@@ -1145,6 +1151,27 @@ function handleCellClick(e) {
   const clickedZone = isZoneSquare(row, col);
 
   if (state.placingShape) {
+    if (state.phase === "play") {
+      if (clickedZone) {
+        const zoneStack = state.flagZone.stack;
+        if (zoneStack && zoneStack.playerId === player.id) {
+          state.placingShape = null;
+          state.selected = { inZone: true };
+          state.lastMessage = "Switched to movement. Reinforcements can only be placed on your home row.";
+          render();
+          return;
+        }
+      } else {
+        const friendly = cellAt(row, col);
+        if (friendly && friendly.playerId === player.id && !isHomeSquare(player.side, row, col)) {
+          state.placingShape = null;
+          state.selected = { row, col, inZone: false };
+          state.lastMessage = "Switched to movement. Reinforcements can only be placed on your home row.";
+          render();
+          return;
+        }
+      }
+    }
     if (clickedZone) {
       state.lastMessage = "Cannot place on the flag zone.";
       render();
@@ -1195,11 +1222,14 @@ function handleCellClick(e) {
     const cell = cellAt(row, col);
     if (cell && cell.playerId === player.id) {
       state.selected = { row, col, inZone: false };
+      const maxMove = maxMoveForStack(cell);
       if (cell.hasFlag) {
         const target = oppositeSide(player.side);
-        state.lastMessage = `Select a destination. Win by reaching the ${target} edge while carrying the flag.`;
+        state.lastMessage =
+          `Selected flag carrier (x${cell.height}). Max move ${maxMove} while carrying the flag. ` +
+          `Reach the ${target} edge to win.`;
       } else {
-        state.lastMessage = "Select a destination.";
+        state.lastMessage = `Selected stack (x${cell.height}). Max move ${maxMove}. Choose destination.`;
       }
     } else {
       state.lastMessage = "Select one of your stacks to move.";
@@ -1242,11 +1272,14 @@ function handleCellClick(e) {
       }
       if (sameSelected || !legalDestination) {
         state.selected = { row, col, inZone: false };
+        const maxMove = maxMoveForStack(clickedStack);
         if (clickedStack.hasFlag) {
           const target = oppositeSide(player.side);
-          state.lastMessage = `Selected flag carrier. Reach the ${target} edge to win.`;
+          state.lastMessage =
+            `Selected flag carrier (x${clickedStack.height}). Max move ${maxMove} while carrying the flag. ` +
+            `Reach the ${target} edge to win.`;
         } else {
-          state.lastMessage = "Selected stack. Choose destination.";
+          state.lastMessage = `Selected stack (x${clickedStack.height}). Max move ${maxMove}. Choose destination.`;
         }
         render();
         return;
