@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types/profile';
+import { sanitizeAvatarIconForRole } from '../types/profile';
 
 interface ProfileRow {
   display_name: string;
@@ -13,13 +14,14 @@ interface ProfileRow {
 }
 
 function toProfile(row: ProfileRow): Profile {
+  const role = row.role === 'admin' ? 'admin' : 'user';
   return {
     nickname: row.display_name,
-    avatarIcon: row.avatar_icon,
+    avatarIcon: sanitizeAvatarIconForRole(row.avatar_icon, role),
     accentColor: row.accent_color,
     reducedMotion: row.reduced_motion,
     analyticsOptOut: row.analytics_opt_out,
-    role: row.role === 'admin' ? 'admin' : 'user',
+    role,
     launcherStyle: (row.launcher_style as Profile['launcherStyle']) ?? 'craft-desk',
   };
 }
@@ -27,7 +29,7 @@ function toProfile(row: ProfileRow): Profile {
 function toRow(profile: Profile): Omit<ProfileRow, 'updated_at' | 'role'> {
   return {
     display_name: profile.nickname.trim().replace(/\s+/g, ' '),
-    avatar_icon: profile.avatarIcon,
+    avatar_icon: sanitizeAvatarIconForRole(profile.avatarIcon, profile.role),
     accent_color: profile.accentColor,
     reduced_motion: profile.reducedMotion,
     analytics_opt_out: profile.analyticsOptOut,

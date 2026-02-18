@@ -2,6 +2,14 @@ import type { WhatsNewPost } from '../types/whatsNew';
 
 export const WHATS_NEW_POSTS: WhatsNewPost[] = [
   {
+    id: 'ann-thanks-for-feedback',
+    title: 'Thanks for Playing',
+    description: 'Thank you for playing and sending feedback. We are making steady improvements across the site to keep things smooth, clear, and fun.',
+    emoji: '\u{1F44B}',
+    category: 'announcement',
+    publishedAt: '2026-02-18',
+  },
+  {
     id: 'ann-game-night',
     title: 'Game Night This Friday',
     description: 'Join us for an evening of Almost, Sidequests, and more at the community hall. Doors open at 6 pm.',

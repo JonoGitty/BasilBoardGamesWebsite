@@ -20,16 +20,41 @@ export interface Profile {
 /** Privacy policy version string (e.g. "2026-02-18"). Bump on policy changes. */
 export const CURRENT_PRIVACY_POLICY_VERSION = '2026-02-18';
 
+export const DEFAULT_AVATAR_ICON = '\u{1F3B2}';
+export const CROWN_AVATAR_ICON = '\u{1F451}';
+
 export const AVATAR_ICONS = [
-  '\u{1F3B2}', // dice
+  DEFAULT_AVATAR_ICON, // dice
   '\u{1F0CF}', // joker
   '\u{1F3AF}', // target
   '\u{1F9E9}', // puzzle
-  '\u{1F451}', // crown
+  CROWN_AVATAR_ICON, // crown
   '\u{1F525}', // fire
   '\u{2B50}',  // star
   '\u{1F30A}', // wave
 ];
+
+export function getAvatarIconsForRole(role: Profile['role']): string[] {
+  if (role === 'admin') return AVATAR_ICONS;
+  return AVATAR_ICONS.filter((icon) => icon !== CROWN_AVATAR_ICON);
+}
+
+export function sanitizeAvatarIconForRole(
+  avatarIcon: string,
+  role: Profile['role'],
+): string {
+  if (role !== 'admin' && avatarIcon === CROWN_AVATAR_ICON) {
+    return DEFAULT_AVATAR_ICON;
+  }
+  return avatarIcon;
+}
+
+export function sanitizeProfileForRole(profile: Profile): Profile {
+  return {
+    ...profile,
+    avatarIcon: sanitizeAvatarIconForRole(profile.avatarIcon, profile.role),
+  };
+}
 
 export const ACCENT_COLORS = [
   { label: 'Violet', value: '#7c6ff7' },
@@ -42,7 +67,7 @@ export const ACCENT_COLORS = [
 
 export const DEFAULT_PROFILE: Profile = {
   nickname: 'Player',
-  avatarIcon: '\u{1F3B2}',
+  avatarIcon: DEFAULT_AVATAR_ICON,
   accentColor: '#7c6ff7',
   reducedMotion: false,
   analyticsOptOut: false,

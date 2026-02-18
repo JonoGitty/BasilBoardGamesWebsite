@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchFeedback, updateFeedbackStatus } from '../services/adminApi';
 import type { FeedbackRow } from '../types/admin';
 
 type StatusFilter = 'all' | 'new' | 'reviewed' | 'resolved' | 'dismissed';
+type FeedbackStatus = FeedbackRow['status'];
 
 const STATUS_OPTIONS: StatusFilter[] = ['all', 'new', 'reviewed', 'resolved', 'dismissed'];
 
@@ -26,20 +27,29 @@ function formatDate(iso: string): string {
   }
 }
 
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+interface ToastState {
+  message: string;
+  type: 'success' | 'error';
+}
+
 function FeedbackDetail({
   item,
   onStatusChange,
+  busyItemId,
 }: {
   item: FeedbackRow;
-  onStatusChange: (id: number, status: string, note?: string | null) => Promise<void>;
+  onStatusChange: (id: number, status: FeedbackStatus, note?: string | null) => Promise<void>;
+  busyItemId: number | null;
 }) {
   const [note, setNote] = useState(item.admin_note ?? '');
-  const [busy, setBusy] = useState(false);
+  const isBusy = busyItemId === item.id;
 
-  const handleStatus = async (newStatus: string) => {
-    setBusy(true);
-    await onStatusChange(item.id, newStatus, note || null);
-    setBusy(false);
+  const handleStatus = (newStatus: FeedbackStatus) => {
+    void onStatusChange(item.id, newStatus, note || null);
   };
 
   return (
@@ -77,6 +87,7 @@ function FeedbackDetail({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Optional note..."
+          disabled={isBusy}
         />
       </div>
 
@@ -87,10 +98,10 @@ function FeedbackDetail({
             <button
               key={s}
               className={`admin__action-btn ${s === 'resolved' ? 'admin__action-btn--accent' : s === 'dismissed' ? 'admin__action-btn--warn' : ''}`}
-              disabled={busy}
-              onClick={() => void handleStatus(s)}
+              disabled={isBusy}
+              onClick={() => handleStatus(s)}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {isBusy ? 'Saving...' : capitalize(s)}
             </button>
           ))}
       </div>
@@ -105,10 +116,22 @@ export default function AdminFeedbackTab() {
   const [filter, setFilter] = useState<StatusFilter>('new');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [busyItemId, setBusyItemId] = useState<number | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, type });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => { if (toastTimer.current) clearTimeout(toastTimer.current); };
+  }, []);
 
   // Fetch data when filter or refreshKey changes.
-  // setState only in the async .then() callback — never synchronously in the effect body.
-  // Initial loading=true comes from useState default; subsequent loads set it via event handlers.
   useEffect(() => {
     let cancelled = false;
     const filters: { status?: string } = {};
@@ -136,18 +159,56 @@ export default function AdminFeedbackTab() {
     setRefreshKey((k) => k + 1);
   }, []);
 
-  const handleStatusChange = async (id: number, status: string, note?: string | null) => {
-    const result = await updateFeedbackStatus(id, status, note);
+  const handleStatusChange = async (id: number, newStatus: FeedbackStatus, note?: string | null) => {
+    setBusyItemId(id);
+    setError('');
+
+    const result = await updateFeedbackStatus(id, newStatus, note);
+
     if (result.ok) {
-      refresh();
+      // Optimistic local update: update the item's status in place
+      setItems((prev) => prev.map((item) =>
+        item.id === id
+          ? { ...item, status: newStatus, admin_note: note ?? item.admin_note }
+          : item,
+      ));
       setExpandedId(null);
+
+      // Build toast message
+      const filterExcludes = filter !== 'all' && filter !== newStatus;
+      const msg = filterExcludes
+        ? `Updated to ${capitalize(newStatus)}. Item will leave "${capitalize(filter)}" filter on next refresh.`
+        : `Updated to ${capitalize(newStatus)}.`;
+      showToast(msg, 'success');
     } else {
-      setError(result.error ?? 'Update failed');
+      const errMsg = result.error ?? 'Update failed';
+      setError(errMsg);
+      showToast(`Failed: ${errMsg}`, 'error');
     }
+
+    setBusyItemId(null);
   };
 
   return (
     <div>
+      {toast && (
+        <div
+          className={`admin__fb-toast ${toast.type === 'success' ? 'admin__fb-toast--success' : 'admin__fb-toast--error'}`}
+          role="status"
+          aria-live="polite"
+        >
+          {toast.message}
+          <button
+            className="admin__fb-toast-close"
+            onClick={() => setToast(null)}
+            type="button"
+            aria-label="Dismiss"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       <div className="admin__fb-toolbar">
         <select
           className="settings__input admin__select"
@@ -155,7 +216,7 @@ export default function AdminFeedbackTab() {
           onChange={(e) => changeFilter(e.target.value as StatusFilter)}
         >
           {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>{s === 'all' ? 'All statuses' : s.charAt(0).toUpperCase() + s.slice(1)}</option>
+            <option key={s} value={s}>{s === 'all' ? 'All statuses' : capitalize(s)}</option>
           ))}
         </select>
         <button className="admin__action-btn" onClick={refresh} disabled={loading}>
@@ -188,7 +249,7 @@ export default function AdminFeedbackTab() {
                 <span className="admin__fb-expand">{expandedId === item.id ? '\u25B2' : '\u25BC'}</span>
               </button>
               {expandedId === item.id && (
-                <FeedbackDetail item={item} onStatusChange={handleStatusChange} />
+                <FeedbackDetail item={item} onStatusChange={handleStatusChange} busyItemId={busyItemId} />
               )}
             </div>
           ))}

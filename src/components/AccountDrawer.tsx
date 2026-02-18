@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Profile } from '../types/profile';
+import { sanitizeAvatarIconForRole } from '../types/profile';
 import { useAuth } from '../auth/AuthContext';
 import SettingsPanel from './SettingsPanel';
 import AuthForm from './AuthForm';
@@ -34,6 +35,7 @@ function AccountNav({
   onOpenAbout: () => void;
 }) {
   const { user, signOut } = useAuth();
+  const avatarIcon = sanitizeAvatarIconForRole(profile.avatarIcon, isAdmin ? 'admin' : 'user');
 
   return (
     <>
@@ -43,7 +45,7 @@ function AccountNav({
           style={{ borderColor: profile.accentColor }}
           aria-hidden="true"
         >
-          {profile.avatarIcon}
+          {avatarIcon}
         </div>
         <div>
           <span className="account-drawer__name">{user ? (profile.nickname || 'Player') : 'Guest'}</span>

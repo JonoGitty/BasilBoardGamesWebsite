@@ -587,7 +587,7 @@ function renderHud() {
     : state.phase === "setup"
     ? state.setupMode === "turn"
       ? `${p.name} placing starter (${(state.starterPlacedBy[p.id] || 0) + 1}/${STARTER_COUNT})`
-      : "Setup: place your 6 starters"
+      : `Hidden setup: ${state.startersPlaced}/${STARTER_COUNT} starters placed`
     : `${p.name}'s turn (${p.side}${p.isAI ? ", AI" : ""})`;
   statusEl.textContent = state.lastMessage;
   if (winModalEl && winMessageEl) {
@@ -1192,7 +1192,9 @@ function handleCellClick(e) {
 
   if (!state.selected) {
     if (state.phase === "setup") {
-      state.lastMessage = "Select a starter piece to place.";
+      state.lastMessage = state.setupMode === "hidden"
+        ? "Pick a shape (circle/triangle/square) from the buttons below, then click a home-row square."
+        : "Select a starter piece to place.";
       render();
       return;
     }
@@ -1319,7 +1321,7 @@ function cancelAction() {
 }
 
 function aiDelayMs() {
-  const speed = aiSpeedSelect.value;
+  const speed = aiSpeedSelect ? aiSpeedSelect.value : "normal";
   if (speed === "fast") return 80;
   if (speed === "slow") return 650;
   return 250;
@@ -1345,13 +1347,24 @@ function runAiTurn(player) {
   if (state.phase !== "play") return;
   if (!player.isAI) return;
 
-  const acted = aiAct(player);
-  if (!acted) {
-    state.lastMessage = `${player.name} passes (no moves).`;
-    logDev(`${player.name} passes (no legal actions).`);
+  try {
+    const acted = aiAct(player);
+    if (!acted) {
+      state.lastMessage = `${player.name} passes (no moves).`;
+      logDev(`${player.name} passes (no legal actions).`);
+    }
+    render();
+    if (!state.gameOver) nextTurn();
+  } catch (err) {
+    logDev(`AI turn error for ${player.name}: ${err && err.message || err}`);
+    // Force-advance so the game never freezes on a failed AI turn.
+    state.selected = null;
+    state.placingShape = null;
+    state.lastMessage = `${player.name} passes (error recovery).`;
+    state.current = (state.current + 1) % state.players.length;
+    try { render(); } catch (_) { /* best effort */ }
+    maybeRunAI();
   }
-  render();
-  if (!state.gameOver) nextTurn();
 }
 
 function runAiSetupTurn(player) {
@@ -1359,23 +1372,29 @@ function runAiSetupTurn(player) {
   if (state.phase !== "setup" || state.setupMode !== "turn") return;
   if (!player.isAI) return;
 
-  const plan = ensureAiStarterPlan(player);
-  const weights =
-    plan.strategy.name === "counter" ? counterWeights(state.starterCounts) : plan.strategy.weights;
-  const shape = chooseStarterShapeFromRemaining(plan.remaining, weights);
-  if (!shape) {
-    state.lastMessage = `${player.name} has no starter placements left.`;
+  try {
+    const plan = ensureAiStarterPlan(player);
+    const weights =
+      plan.strategy.name === "counter" ? counterWeights(state.starterCounts) : plan.strategy.weights;
+    const shape = chooseStarterShapeFromRemaining(plan.remaining, weights);
+    if (!shape) {
+      state.lastMessage = `${player.name} has no starter placements left.`;
+      advanceSetupTurn();
+      return;
+    }
+    const placed = placeSingleStarterByPattern(player, shape, plan.pattern, plan.anchor);
+    if (placed) {
+      plan.remaining[shape] -= 1;
+      state.lastMessage = `${player.name} placed a ${shape} starter.`;
+    } else {
+      state.lastMessage = `${player.name} could not place a ${shape} starter.`;
+    }
     advanceSetupTurn();
-    return;
+  } catch (err) {
+    logDev(`AI setup error for ${player.name}: ${err && err.message || err}`);
+    state.lastMessage = `${player.name} skipped (error recovery).`;
+    advanceSetupTurn();
   }
-  const placed = placeSingleStarterByPattern(player, shape, plan.pattern, plan.anchor);
-  if (placed) {
-    plan.remaining[shape] -= 1;
-    state.lastMessage = `${player.name} placed a ${shape} starter.`;
-  } else {
-    state.lastMessage = `${player.name} could not place a ${shape} starter.`;
-  }
-  advanceSetupTurn();
 }
 
 function difficultySettings() {
@@ -1926,6 +1945,7 @@ function syncLobbyControls() {
 }
 
 function resetGame() {
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
   syncLobbyControls();
   const config = gameConfigFromControls();
   const requestedSetupMode = starterModeSelect ? starterModeSelect.value : DEFAULT_STARTER_MODE;
@@ -1934,6 +1954,9 @@ function resetGame() {
   if (setupMode === "hidden" && state.setupMode !== "hidden") {
     state.lastMessage =
       "Hidden lock-in currently supports single-local-player games. Switched to turn-based starters.";
+  } else if (state.setupMode === "hidden") {
+    state.lastMessage =
+      "Hidden setup: pick a shape below, place 6 starters on your home row, then press Lock Starters. Bots place after you lock.";
   }
   if (state.setupMode === "turn") {
     initAiStarterPlans(true);

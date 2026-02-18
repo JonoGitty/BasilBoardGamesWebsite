@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toAdminPost, updateGame, setActiveLineup } from './adminApi';
+import { toAdminPost, updateGame, setActiveLineup, updateFeedbackStatus } from './adminApi';
 
 describe('adminApi mapping', () => {
   it('maps a published PostRow to AdminPost', () => {
@@ -63,5 +63,42 @@ describe('adminApi client-side validation', () => {
     const result = await setActiveLineup([]);
     expect(result.ok).toBe(false);
     expect(result.error).toBe('At least one game is required');
+  });
+});
+
+describe('updateFeedbackStatus client-side validation', () => {
+  it('rejects invalid feedback ID (zero)', async () => {
+    const result = await updateFeedbackStatus(0, 'reviewed');
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('Invalid feedback ID');
+  });
+
+  it('rejects invalid feedback ID (negative)', async () => {
+    const result = await updateFeedbackStatus(-1, 'resolved');
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('Invalid feedback ID');
+  });
+
+  it('rejects invalid feedback ID (non-integer)', async () => {
+    const result = await updateFeedbackStatus(1.5, 'dismissed');
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('Invalid feedback ID');
+  });
+
+  it('rejects invalid status value', async () => {
+    const result = await updateFeedbackStatus(1, 'bogus');
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('Invalid status');
+    expect(result.error).toContain('bogus');
+  });
+
+  it('accepts valid status values without client-side rejection', async () => {
+    // These will fail at the Supabase layer (not configured), but should pass validation
+    for (const status of ['new', 'reviewed', 'resolved', 'dismissed']) {
+      const result = await updateFeedbackStatus(1, status);
+      // Should not be a validation error — it will be a Supabase config error
+      expect(result.error).not.toContain('Invalid status');
+      expect(result.error).not.toContain('Invalid feedback ID');
+    }
   });
 });

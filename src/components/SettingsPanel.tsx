@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Profile } from '../types/profile';
-import { AVATAR_ICONS, ACCENT_COLORS } from '../types/profile';
+import { ACCENT_COLORS, getAvatarIconsForRole } from '../types/profile';
 import { track } from '../analytics/track';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -31,6 +31,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack, isAd
   const nicknameError = validateNickname(draftNickname, isAdmin);
   const { checking, taken } = useNicknameCheck(draftNickname, profile.nickname);
   const canSaveNickname = !nicknameError && !taken && !checking;
+  const avatarIcons = getAvatarIconsForRole(isAdmin ? 'admin' : 'user');
 
   const commitNickname = () => {
     const normalized = normalizeNickname(draftNickname);
@@ -120,7 +121,7 @@ export default function SettingsPanel({ profile, onUpdate, onReset, onBack, isAd
       <fieldset className="settings__field settings__fieldset">
         <legend className="settings__label">Avatar Icon</legend>
         <div className="settings__icon-grid">
-          {AVATAR_ICONS.map((icon) => (
+          {avatarIcons.map((icon) => (
             <button
               key={icon}
               className={`settings__icon-btn${profile.avatarIcon === icon ? ' settings__icon-btn--active' : ''}`}

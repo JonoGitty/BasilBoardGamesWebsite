@@ -1972,6 +1972,51 @@ body {
   margin-top: var(--space-md);
 }
 
+.admin__fb-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-md);
+  animation: fb-toast-in 0.2s ease-out;
+}
+
+.admin__fb-toast--success {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.admin__fb-toast--error {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.admin__fb-toast-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 var(--space-xs);
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.admin__fb-toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes fb-toast-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 640px) {
   .admin__fb-row-header {
     flex-wrap: wrap;

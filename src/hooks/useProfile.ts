@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { useAuth } from '../auth/AuthContext';
-import { DEFAULT_PROFILE } from '../types/profile';
+import { DEFAULT_PROFILE, sanitizeProfileForRole } from '../types/profile';
 import { fetchCloudProfile, upsertCloudProfile } from '../services/profileSync';
 import type { Profile } from '../types/profile';
 
@@ -9,7 +9,7 @@ const STORAGE_KEY = 'basil_profile';
 
 export function useProfile() {
   const [stored, setProfile] = useLocalStorage<Profile>(STORAGE_KEY, DEFAULT_PROFILE);
-  const profile = { ...DEFAULT_PROFILE, ...stored };
+  const profile = sanitizeProfileForRole({ ...DEFAULT_PROFILE, ...stored });
   const { user } = useAuth();
   const hasSynced = useRef(false);
 
@@ -38,7 +38,7 @@ export function useProfile() {
   const update = useCallback(
     (patch: Partial<Profile>) => {
       setProfile((prev) => {
-        const next = { ...prev, ...patch };
+        const next = sanitizeProfileForRole({ ...prev, ...patch });
         if (user) {
           upsertCloudProfile(user.id, next).then((result) => {
             if (!result.ok) {
@@ -54,8 +54,9 @@ export function useProfile() {
   );
 
   const reset = useCallback(() => {
-    setProfile(DEFAULT_PROFILE);
-    if (user) upsertCloudProfile(user.id, DEFAULT_PROFILE);
+    const next = sanitizeProfileForRole(DEFAULT_PROFILE);
+    setProfile(next);
+    if (user) upsertCloudProfile(user.id, next);
   }, [setProfile, user]);
 
   // Apply accent color as CSS custom property

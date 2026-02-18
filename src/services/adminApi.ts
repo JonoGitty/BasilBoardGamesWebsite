@@ -278,12 +278,33 @@ export async function fetchFeedback(
   return { data: data as FeedbackRow[] };
 }
 
+/** Map backend error strings to user-friendly messages. */
+function friendlyFeedbackError(raw: string): string {
+  if (raw.includes('forbidden') || raw.includes('Forbidden'))
+    return 'Permission denied. Only admins can update feedback status.';
+  if (raw.includes('unknown_command'))
+    return 'The feedback.update_status command is not available. Redeploy the admin-command edge function.';
+  if (raw.includes('not found') || raw.includes('No feedback row'))
+    return 'Feedback item not found. It may have been deleted.';
+  if (raw.includes('Invalid status'))
+    return 'Invalid status value. Allowed: new, reviewed, resolved, dismissed.';
+  return raw;
+}
+
 /** Update feedback status via admin command. */
 export async function updateFeedbackStatus(
   feedbackId: number,
   status: string,
   adminNote?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (!Number.isInteger(feedbackId) || feedbackId <= 0) {
+    return { ok: false, error: 'Invalid feedback ID' };
+  }
+  const validStatuses = ['new', 'reviewed', 'resolved', 'dismissed'];
+  if (!validStatuses.includes(status)) {
+    return { ok: false, error: `Invalid status "${status}". Allowed: ${validStatuses.join(', ')}` };
+  }
+
   const args: Record<string, unknown> = { feedbackId, status };
   if (adminNote !== undefined) args.adminNote = adminNote;
 
@@ -292,7 +313,7 @@ export async function updateFeedbackStatus(
     args,
   );
   if (!cmd.ok) {
-    return { ok: false, error: cmd.error ?? 'Update failed' };
+    return { ok: false, error: friendlyFeedbackError(cmd.error ?? 'Update failed') };
   }
   return { ok: true };
 }

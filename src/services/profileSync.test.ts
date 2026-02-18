@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { toProfile, toRow } from './profileSync';
+import { CROWN_AVATAR_ICON, DEFAULT_AVATAR_ICON } from '../types/profile';
 
 describe('profileSync mapping', () => {
   const profile = {
     nickname: 'TestPlayer',
-    avatarIcon: '\u{1F451}',
+    avatarIcon: DEFAULT_AVATAR_ICON,
     accentColor: '#60a5fa',
     reducedMotion: true,
     analyticsOptOut: false,
@@ -14,7 +15,7 @@ describe('profileSync mapping', () => {
 
   const row = {
     display_name: 'TestPlayer',
-    avatar_icon: '\u{1F451}',
+    avatar_icon: CROWN_AVATAR_ICON,
     accent_color: '#60a5fa',
     reduced_motion: true,
     analytics_opt_out: false,
@@ -32,7 +33,7 @@ describe('profileSync mapping', () => {
     const result = toRow(profile);
     expect(result).toEqual({
       display_name: 'TestPlayer',
-      avatar_icon: '\u{1F451}',
+      avatar_icon: DEFAULT_AVATAR_ICON,
       accent_color: '#60a5fa',
       reduced_motion: true,
       analytics_opt_out: false,
@@ -48,6 +49,21 @@ describe('profileSync mapping', () => {
   it('toProfile maps admin role from row', () => {
     const adminRow = { ...row, role: 'admin' };
     expect(toProfile(adminRow).role).toBe('admin');
+  });
+
+  it('toProfile strips crown avatar for non-admin users', () => {
+    const userRow = { ...row, role: 'user' };
+    expect(toProfile(userRow).avatarIcon).toBe(DEFAULT_AVATAR_ICON);
+  });
+
+  it('toProfile keeps crown avatar for admins', () => {
+    const adminRow = { ...row, role: 'admin' };
+    expect(toProfile(adminRow).avatarIcon).toBe(CROWN_AVATAR_ICON);
+  });
+
+  it('toRow strips crown avatar for non-admin profile writes', () => {
+    const userProfile = { ...profile, role: 'user' as const, avatarIcon: CROWN_AVATAR_ICON };
+    expect(toRow(userProfile).avatar_icon).toBe(DEFAULT_AVATAR_ICON);
   });
 
   it('toRow excludes role from output', () => {
