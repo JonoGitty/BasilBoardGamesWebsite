@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elam – Capture the Flag</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>Elam</h1>
+        <p class="subtitle">Local Mode: hotseat + bots</p>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="control-block">
+        <label for="localPlayers">Local opponents</label>
+        <select id="localPlayers">
+          <option value="0" selected>0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="control-block">
+        <label for="botCount">Bots</label>
+        <select id="botCount">
+          <option value="0">0</option>
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="control-block" id="aiSpeedBlock">
+        <label for="aiSpeed">AI speed</label>
+        <select id="aiSpeed">
+          <option value="fast">Fast</option>
+          <option value="normal" selected>Normal</option>
+          <option value="slow">Slow</option>
+        </select>
+      </div>
+      <div class="control-block" id="aiDifficultyBlock">
+        <label for="aiDifficulty">Bot difficulty</label>
+        <select id="aiDifficulty">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+          <option value="competitive">Competitive</option>
+        </select>
+      </div>
+      <button id="newGame">Start / Reset</button>
+    </section>
+
+    <section class="hud">
+      <div id="turnInfo"></div>
+      <div id="status"></div>
+    </section>
+
+    <section class="starters">
+      <h2>Starters</h2>
+      <div class="starter-controls">
+        <label for="starterMode">Starter mode</label>
+        <select id="starterMode">
+          <option value="hidden">Hidden lock-in</option>
+          <option value="turn" selected>Turn-based placement</option>
+        </select>
+      </div>
+      <div id="starterInfo"></div>
+      <button id="lockStarters">Lock starters</button>
+    </section>
+
+    <section class="board-stage">
+      <section class="board-wrapper">
+        <div id="board" class="board" role="grid" aria-label="Elam board"></div>
+      </section>
+
+      <section class="actions board-dock">
+        <div class="action-row">
+          <span>Place:</span>
+          <button class="place-btn" data-shape="circle">Circle</button>
+          <button class="place-btn" data-shape="triangle">Triangle</button>
+          <button class="place-btn" data-shape="square">Square</button>
+        </div>
+        <div class="action-row">
+          <button id="cancelAction">Cancel selection</button>
+        </div>
+        <div class="action-row tiny">Tip: click a friendly stack to move it; click a home-row square after selecting a shape to place.</div>
+      </section>
+    </section>
+
+    <section class="supplies">
+      <h2>Supplies</h2>
+      <div id="supplyList"></div>
+    </section>
+
+    <details class="rules" id="rulesPanel">
+      <summary>How To Play (Full Rulebook)</summary>
+      <div class="rules-book">
+        <details class="rule-section" open>
+          <summary>1) Components and Board</summary>
+          <ul>
+            <li>Board size is 8x8.</li>
+            <li>The center 2x2 is treated as one shared Flag Zone.</li>
+            <li>Each player uses 3 shapes: Circle, Triangle, Square.</li>
+            <li>This build uses 12 pieces per player total (4 of each shape).</li>
+            <li>Stacks can be any height, but only same-shape pieces may stack.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section" open>
+          <summary>2) Objective and Win Condition</summary>
+          <ul>
+            <li>Take control of the flag from the center and carry it to your opposite edge.</li>
+            <li>You win immediately when your flag-carrying stack reaches your opposite edge square.</li>
+            <li>If a flag carrier is captured, the attacker takes the flag at that capture square.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>3) Game Setup and Starter Phase</summary>
+          <ul>
+            <li>Board starts empty, with neutral flag in the Flag Zone.</li>
+            <li>Each player places 6 starter pieces before normal play begins.</li>
+            <li>Starter constraint: at least 1 Circle, 1 Triangle, and 1 Square among your 6.</li>
+            <li><strong>Turn-based starter mode:</strong> players alternate one starter placement at a time.</li>
+            <li><strong>Hidden lock-in mode:</strong> local solo-with-bots lock-in flow where you place 6 then lock.</li>
+          </ul>
+          <p class="rule-note">Local note: if multiple local humans are selected, starter mode automatically runs as turn-based for fairness.</p>
+        </details>
+
+        <details class="rule-section">
+          <summary>4) Turn Structure</summary>
+          <ul>
+            <li>On your turn, take exactly one action: <strong>Place</strong> or <strong>Move</strong>.</li>
+            <li>Place: add one piece from supply on your home edge (or onto same-shape friendly stack there).</li>
+            <li>Move: move exactly one stack from origin to destination.</li>
+            <li>You may reselect another friendly stack before committing a destination.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>5) Movement and Stack Distance</summary>
+          <ul>
+            <li>Stacks move orthogonally or diagonally in straight lines.</li>
+            <li>Maximum move distance equals stack height.</li>
+            <li>If a stack carries the flag, movement is slowed to half height (rounded down), minimum 1.</li>
+            <li>You cannot pass through the Flag Zone while traversing a path.</li>
+            <li>You cannot move through an opposing stack of the same shape as your moving stack.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>6) Combat and Captures</summary>
+          <ul>
+            <li>Combat is Rock-Paper-Scissors style:</li>
+            <li>Circle beats Triangle, Triangle beats Square, Square beats Circle.</li>
+            <li>If your shape beats the defender, capture succeeds and your stack occupies that square.</li>
+            <li>Capture removes the entire defending stack regardless of height.</li>
+            <li>Same-shape enemies cannot be captured and block movement instead.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>7) Flag Zone Rules</summary>
+          <ul>
+            <li>Only one stack may occupy the Flag Zone at any time.</li>
+            <li>Entering zone is allowed if reachable by legal movement line and distance.</li>
+            <li>Exiting zone must go to an adjacent non-zone square.</li>
+            <li>If a carrier enters zone, temporary zone safety applies for 2 turns.</li>
+            <li>After safety expires, enemies may capture in zone if normal shape rules allow it.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>8) Flag Pickup and Handoff</summary>
+          <ul>
+            <li>Neutral flag is picked up when your stack reaches the flag location.</li>
+            <li>Friendly handoff is automatic when your moving stack ends adjacent to a friendly flag carrier.</li>
+            <li>Handoff stays within team control; it does not transfer to enemies unless capture occurs.</li>
+          </ul>
+        </details>
+
+        <details class="rule-section">
+          <summary>9) Practical Clarifications</summary>
+          <ul>
+            <li>You can add same-shape pieces onto a stack even when that stack carries the flag.</li>
+            <li>You cannot stack different shapes, even if both are friendly.</li>
+            <li>If no legal move exists for AI, AI passes automatically.</li>
+            <li>In online rooms, the server is authoritative for all rule checks.</li>
+          </ul>
+        </details>
+      </div>
+    </details>
+
+    <footer class="site-footer">
+      © 2026 BasilBoardGames. All rights reserved. Playtest version - not for redistribution.
+    </footer>
+
+  </div>
+
+  <div id="playtestGate" class="playtest-gate" role="dialog" aria-modal="true" aria-labelledby="playtestTitle">
+    <div class="playtest-card">
+      <h2 id="playtestTitle">Playtest Version Notice</h2>
+      <p class="playtest-copy">This game is provided for private playtesting.</p>
+      <p class="playtest-copy">You may not copy, share, or reuse any part of it.</p>
+      <p class="playtest-copy">By continuing, you agree to these terms.</p>
+      <p class="playtest-splash">Playtesting build - not for redistribution.</p>
+      <button id="playtestAgree" type="button">I agree - continue to demo</button>
+    </div>
+  </div>
+
+  <div id="winModal" class="win-modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-card">
+      <h2 id="winTitle">Victory</h2>
+      <p id="winMessage">Game over.</p>
+      <button id="winAction">Play Again</button>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

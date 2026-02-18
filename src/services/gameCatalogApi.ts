@@ -27,6 +27,11 @@ function badgeFromStatus(status: GameStatus): string | undefined {
   }
 }
 
+/** Lookup for onlineUrl values that are code-defined, not DB-stored. */
+const onlineUrlByGameId: Record<string, string | undefined> = Object.fromEntries(
+  GAMES.filter((g) => g.onlineUrl).map((g) => [g.id, g.onlineUrl]),
+);
+
 function toGame(row: GameRow): Game {
   return {
     id: row.id,
@@ -34,6 +39,7 @@ function toGame(row: GameRow): Game {
     description: row.description,
     emoji: row.emoji,
     url: row.url ?? undefined,
+    onlineUrl: onlineUrlByGameId[row.id],
     status: row.status,
     badge: badgeFromStatus(row.status),
     sortOrder: row.sort_order,

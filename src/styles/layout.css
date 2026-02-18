@@ -771,6 +771,110 @@ body {
   margin-top: 2px;
 }
 
+/* ── Game mode selector ──────────────────────────────── */
+.mode-selector-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.mode-selector {
+  width: min(420px, calc(100vw - 32px));
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-elevated);
+}
+
+.mode-selector__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.mode-selector__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mode-selector__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.mode-selector__btn:hover,
+.mode-selector__btn:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+  outline: none;
+}
+
+.mode-selector__btn:active {
+  transform: scale(0.98);
+}
+
+.mode-selector__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mode-selector__label {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mode-selector__desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.mode-selector__close {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-lg);
+  padding: var(--space-sm) 0;
+  min-height: var(--tap-min);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.mode-selector__close:hover,
+.mode-selector__close:focus-visible {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+}
+
 /* ── Reduced motion ───────────────────────────────────── */
 .reduce-motion *,
 .reduce-motion *::before,

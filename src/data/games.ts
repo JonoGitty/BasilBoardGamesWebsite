@@ -1,14 +1,15 @@
 import type { Game } from '../types/game';
-import { getElamUrl } from '../lib/elamUrl';
+import { getElamUrl, getElamOnlineUrl } from '../lib/elamUrl';
 
 export const GAMES: Game[] = [
   {
     id: 'elam',
     title: 'Elam',
-    description: 'Build and trade in the cradle of civilisation. A strategic resource game.',
+    description: 'Capture the flag and race it home. A tactical strategy board game.',
     emoji: '\u{1F3DB}\uFE0F',
     status: 'live',
     url: getElamUrl(),
+    onlineUrl: getElamOnlineUrl(),
     sortOrder: 1,
   },
   {

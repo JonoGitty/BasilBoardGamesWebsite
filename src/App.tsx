@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Game } from './types/game';
-import { launchGame } from './services/gameLauncher';
+import { launchGame, launchGameMode } from './services/gameLauncher';
 import { AuthProvider } from './auth/AuthContext';
 import { useProfile } from './hooks/useProfile';
 import { useAdmin } from './hooks/useAdmin';
 import { track, initTransport } from './analytics/track';
 import LayoutShell from './components/LayoutShell';
 import GameLaunch from './components/GameLaunch';
+import GameModeSelector from './components/GameModeSelector';
 import AdminPanel from './components/AdminPanel';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import AboutPage from './components/AboutPage';
@@ -17,6 +18,7 @@ type AppView = 'home' | 'game' | 'admin' | 'privacy' | 'about';
 function AppContent() {
   const [view, setView] = useState<AppView>('home');
   const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const [choosingGame, setChoosingGame] = useState<Game | null>(null);
   const { profile, update, reset } = useProfile();
   const { isAdmin } = useAdmin(profile);
 
@@ -27,10 +29,23 @@ function AppContent() {
 
   const handleLaunch = useCallback((game: Game) => {
     const result = launchGame(game);
-    if (result.mode === 'internal') {
+    if (result.mode === 'choose') {
+      setChoosingGame(result.game);
+    } else if (result.mode === 'internal') {
       setActiveGame(game);
       setView('game');
     }
+  }, []);
+
+  const handleModeSelect = useCallback((mode: 'local' | 'online') => {
+    if (choosingGame) {
+      launchGameMode(choosingGame, mode);
+      setChoosingGame(null);
+    }
+  }, [choosingGame]);
+
+  const handleModeClose = useCallback(() => {
+    setChoosingGame(null);
   }, []);
 
   const handleExit = useCallback(() => {
@@ -91,6 +106,13 @@ function AppContent() {
         onOpenPrivacy={handleOpenPrivacy}
         onOpenAbout={handleOpenAbout}
       />
+      {choosingGame && (
+        <GameModeSelector
+          game={choosingGame}
+          onSelect={handleModeSelect}
+          onClose={handleModeClose}
+        />
+      )}
       <ConsentBanner onOpenPrivacy={handleOpenPrivacy} />
     </>
   );
