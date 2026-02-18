@@ -1116,6 +1116,10 @@ function nextTurn() {
     render();
     return;
   }
+  if (aiTimer) {
+    clearTimeout(aiTimer);
+    aiTimer = null;
+  }
   // Track how long the current flag carrier sits in the zone.
   const current = currentPlayer();
   if (state.flagZone.stack && state.flagZone.stack.playerId === current.id) {
@@ -1141,27 +1145,6 @@ function handleCellClick(e) {
   const clickedZone = isZoneSquare(row, col);
 
   if (state.placingShape) {
-    if (state.phase === "play") {
-      if (clickedZone) {
-        const zoneStack = state.flagZone.stack;
-        if (zoneStack && zoneStack.playerId === player.id) {
-          state.placingShape = null;
-          state.selected = { inZone: true };
-          state.lastMessage = "Switched to moving stack from flag zone.";
-          render();
-          return;
-        }
-      } else {
-        const friendly = cellAt(row, col);
-        if (friendly && friendly.playerId === player.id) {
-          state.placingShape = null;
-          state.selected = { row, col, inZone: false };
-          state.lastMessage = "Switched to moving selected stack.";
-          render();
-          return;
-        }
-      }
-    }
     if (clickedZone) {
       state.lastMessage = "Cannot place on the flag zone.";
       render();
@@ -1333,18 +1316,26 @@ function maybeRunAI() {
   if (state.phase === "setup" && state.setupMode === "turn") {
     if (!player.isAI) return;
     if (aiTimer) clearTimeout(aiTimer);
-    aiTimer = setTimeout(() => runAiSetupTurn(player), aiDelayMs());
+    aiTimer = setTimeout(() => {
+      aiTimer = null;
+      runAiSetupTurn();
+    }, aiDelayMs());
     return;
   }
   if (state.phase !== "play") return;
   if (!player.isAI) return;
   if (aiTimer) clearTimeout(aiTimer);
-  aiTimer = setTimeout(() => runAiTurn(player), aiDelayMs());
+  aiTimer = setTimeout(() => {
+    aiTimer = null;
+    runAiTurn();
+  }, aiDelayMs());
 }
 
-function runAiTurn(player) {
+function runAiTurn() {
   if (state.gameOver) return;
   if (state.phase !== "play") return;
+  const player = currentPlayer();
+  if (!player) return;
   if (!player.isAI) return;
 
   try {
@@ -1367,9 +1358,11 @@ function runAiTurn(player) {
   }
 }
 
-function runAiSetupTurn(player) {
+function runAiSetupTurn() {
   if (state.gameOver) return;
   if (state.phase !== "setup" || state.setupMode !== "turn") return;
+  const player = currentPlayer();
+  if (!player) return;
   if (!player.isAI) return;
 
   try {
