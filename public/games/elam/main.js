@@ -966,6 +966,9 @@ function checkWin(playerId, loc) {
   if (!player) return;
   if (state.flag.carriedBy !== playerId) return;
   if (loc.inZone) return;
+  const carrier = locateFlagCarrier();
+  if (!carrier || carrier.playerId !== playerId || carrier.inZone) return;
+  if (carrier.row !== loc.row || carrier.col !== loc.col) return;
   if (isOppositeSquare(player.side, loc.row, loc.col)) {
     state.gameOver = true;
     state.winner = `${player.name} wins by reaching the opposite edge with the flag!`;
