@@ -32,6 +32,7 @@ function check(name, pass, detail) {
 const REQUIRED_FILES = [
   'index.html',
   'main.js',
+  'site-config.js',
   'elam-ai/local-ai.js',
 ];
 
@@ -47,9 +48,6 @@ for (const file of REQUIRED_FILES) {
 }
 
 // ── 2. index.html script tags match actual files ───────────
-
-// Scripts injected at deploy time — expected to be absent from source
-const DEPLOY_INJECTED_SCRIPTS = new Set(['site-config.js']);
 
 const indexPath = resolve(ELAM_DIR, 'index.html');
 if (existsSync(indexPath)) {
@@ -67,10 +65,6 @@ if (existsSync(indexPath)) {
   }
 
   for (const src of scriptRefs) {
-    if (DEPLOY_INJECTED_SCRIPTS.has(src)) {
-      check(`script-ref:${src}`, true, 'deploy-injected — expected absent from source');
-      continue;
-    }
     const refPath = resolve(ELAM_DIR, src);
     const exists = existsSync(refPath);
     check(`script-ref:${src}`, exists, exists ? 'referenced file exists' : `MISSING: index.html references "${src}" but file not found`);
