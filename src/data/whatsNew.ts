@@ -2,6 +2,14 @@ import type { WhatsNewPost } from '../types/whatsNew';
 
 export const WHATS_NEW_POSTS: WhatsNewPost[] = [
   {
+    id: 'patch-elam-ai-ladder',
+    title: 'Elam AI Difficulty Upgrade',
+    description: 'Overhauled the four AI difficulty levels. Normal is now noticeably smarter, hard uses 2-ply lookahead to avoid traps, and competitive plays a cautious fortress style with escort and route-blocking tactics.',
+    emoji: '\u{1F9E0}',
+    category: 'patch',
+    publishedAt: '2026-02-19',
+  },
+  {
     id: 'ann-thanks-for-feedback',
     title: 'Thanks for Playing',
     description: 'Thank you for playing and sending feedback. We are making steady improvements across the site to keep things smooth, clear, and fun.',

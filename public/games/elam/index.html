@@ -11,7 +11,14 @@
     <header class="topbar">
       <div>
         <h1>Elam</h1>
-        <p class="subtitle">Local Mode: hotseat + bots</p>
+        <p class="subtitle">Local Mode: hotseat + bots. Same host URL also serves Online Rooms.</p>
+      </div>
+      <div class="topbar-actions">
+        <nav class="mode-switch" aria-label="Mode switch">
+          <a class="mode-link active" href="/index.html">Local Mode</a>
+          <a class="mode-link" href="/online.html">Online Rooms</a>
+        </nav>
+        <button id="feedbackBtn" class="mode-link feedback-link" type="button">Anonymous Feedback</button>
       </div>
     </header>
 
@@ -94,10 +101,6 @@
     <section class="supplies">
       <h2>Supplies</h2>
       <div id="supplyList"></div>
-    </section>
-
-    <section class="controls">
-      <button id="feedbackBtn" class="mode-link feedback-link" type="button">Anonymous Feedback</button>
     </section>
 
     <details class="rules" id="rulesPanel">
@@ -224,7 +227,8 @@
     </div>
   </div>
 
-  <script src="/site-config.js"></script>
+  <script src="site-config.js"></script>
+  <script src="elam-ai/local-ai.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
