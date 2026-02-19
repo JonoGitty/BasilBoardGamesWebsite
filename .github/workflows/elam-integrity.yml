@@ -1,0 +1,42 @@
+name: Elam Integrity
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'public/games/elam/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'public/games/elam/**'
+  schedule:
+    # Weekly Sunday 07:00 UTC — 1 hour after Triarch regression run
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
+
+jobs:
+  elam-integrity:
+    name: Elam mirror integrity check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify Elam file integrity
+        run: node scripts/check-elam-integrity.mjs
+
+      - name: Build site (includes Elam static assets)
+        run: |
+          npm ci
+          npm run build
+
+      - name: Verify Elam files in dist
+        run: |
+          echo "Checking Elam files exist in build output..."
+          test -f dist/games/elam/index.html || { echo "FAIL: dist/games/elam/index.html missing"; exit 1; }
+          test -f dist/games/elam/main.js || { echo "FAIL: dist/games/elam/main.js missing"; exit 1; }
+          test -f dist/games/elam/elam-ai/local-ai.js || { echo "FAIL: dist/games/elam/elam-ai/local-ai.js missing"; exit 1; }
+          echo "All Elam files present in dist."
