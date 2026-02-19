@@ -108,3 +108,34 @@ LIMIT 20;
 - Direct client writes to `games` and `posts` tables are blocked (RLS policies dropped)
 - The edge function uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS after verifying admin role
 - Read operations (fetch games, fetch posts, metrics RPC) still use standard Supabase client with user JWT
+
+## Auto Draft Posts (Unpublished)
+
+For release/change workflows, you can auto-create a **draft** post from recent file changes.
+This does **not** publish the post.
+
+### Command
+
+```bash
+# Preview payload only
+npm run posts:draft:auto -- --dry-run
+
+# Create draft in Supabase (requires env vars)
+export SUPABASE_URL="https://your-project.supabase.co"
+export SUPABASE_ACCESS_TOKEN="<admin-user-jwt>"
+npm run posts:draft:auto
+```
+
+### Optional flags
+
+```bash
+npm run posts:draft:auto -- --from HEAD~1 --to HEAD
+npm run posts:draft:auto -- --title "Elam Balance Update" --category patch --emoji "🧠"
+```
+
+### Behavior
+
+- Infers scope from changed files (Elam, Almost, Interrogate, Admin, Security/Privacy, Site)
+- Generates `posts.upsert_draft` payload
+- Sends command to `admin-command` edge function
+- Leaves `published=false` (manual publish only)

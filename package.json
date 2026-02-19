@@ -18,7 +18,8 @@
     "elam:check": "node scripts/check-elam-integrity.mjs",
     "audit:security": "node scripts/audit/security-audit.mjs",
     "audit:privacy": "node scripts/audit/privacy-inventory.mjs && node scripts/audit/privacy-drift-check.mjs",
-    "audit:all": "npm run audit:security && npm run audit:privacy"
+    "audit:all": "npm run audit:security && npm run audit:privacy",
+    "posts:draft:auto": "node scripts/auto-draft-post.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3",
