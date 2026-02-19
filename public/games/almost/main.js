@@ -320,7 +320,7 @@ function pname(i) { return 'Player ' + (i + 1); }
 
 function saveState() {
   if (!state || !state.rng) return;
-  if (state.phase !== Phase.PLAYING && state.phase !== Phase.GAME_OVER) return;
+  if (state.phase !== Phase.PLAYING && state.phase !== Phase.SLAP_WINDOW && state.phase !== Phase.GAME_OVER) return;
   try {
     const snap = {
       v: 1,
@@ -338,6 +338,13 @@ function saveState() {
       log: state.log.slice(-10),
       savedAt: Date.now(),
     };
+    // SLAP_WINDOW fidelity fields
+    if (state.phase === Phase.SLAP_WINDOW) {
+      snap.slapCondition = state.slapCondition;
+      snap.slapWindowMs = state.slapWindowMs;
+      snap.slapWindowOpenedAt = state.slapWindowOpenedAt;
+      snap.slaps = state.slaps.map((s, i) => ({ pi: s.pi, order: i }));
+    }
     localStorage.setItem(SAVE_KEY, JSON.stringify(snap));
   } catch (_) { /* storage full / private mode / security */ }
 }
@@ -358,13 +365,11 @@ function loadSaveState() {
 }
 
 function restoreFromSnapshot(snap) {
-  state.phase = snap.phase;
   state.players = snap.players.map(p => ({ deck: p.deck, slapAnim: 0 }));
   state.pile = snap.pile;
   state.currentPlayer = snap.currentPlayer;
   state.turnCount = snap.turnCount;
   state.memoryMode = snap.memoryMode;
-  state.slapCondition = SlapCond.NEUTRAL;
   state.finishOrder = snap.finishOrder || [];
   state.winner = snap.winner;
   state.runnerUp = snap.runnerUp;
@@ -372,8 +377,38 @@ function restoreFromSnapshot(snap) {
   state.rng = mulberry32(snap.rngState);
   state.log = snap.log || [];
   state.savedSnapshot = null;
-  addLog('Game resumed.');
-  render();
+
+  if (snap.phase === Phase.SLAP_WINDOW && snap.slapWindowOpenedAt) {
+    state.slapCondition = snap.slapCondition;
+    state.slapWindowMs = snap.slapWindowMs;
+    state.slapWindowOpenedAt = snap.slapWindowOpenedAt;
+    // Reconstruct slaps preserving recorded order
+    state.slaps = (snap.slaps || []).map((s, i) => ({ pi: s.pi, ts: i }));
+
+    const elapsed = Date.now() - snap.slapWindowOpenedAt;
+    const remainingMs = snap.slapWindowMs - elapsed;
+
+    if (remainingMs > 0) {
+      // Window still active — resume with remaining time
+      state.phase = Phase.SLAP_WINDOW;
+      state.slapStartTime = performance.now() - elapsed;
+      addLog('Game resumed \u2014 slap window active!');
+      render();
+      startTimerAnimation();
+      slapTimeoutId = setTimeout(resolveSlapWindow, remainingMs);
+    } else {
+      // Window expired while page was closed — resolve immediately
+      state.phase = Phase.SLAP_WINDOW;
+      addLog('Game resumed \u2014 resolving slap window.');
+      resolveSlapWindow();
+    }
+  } else {
+    // PLAYING phase or SLAP_WINDOW without fidelity data (graceful fallback)
+    state.phase = (snap.phase === Phase.SLAP_WINDOW) ? Phase.PLAYING : snap.phase;
+    state.slapCondition = SlapCond.NEUTRAL;
+    addLog('Game resumed.');
+    render();
+  }
 }
 
 // ── 5c. Exit Game Navigation ─────────────────────────────────
@@ -505,6 +540,8 @@ function openSlapWindow(cond) {
   state.phase = Phase.SLAP_WINDOW;
   state.slaps = [];
   state.slapStartTime = performance.now();
+  state.slapWindowOpenedAt = Date.now();
+  saveState();
   render();
   startTimerAnimation();
   slapTimeoutId = setTimeout(resolveSlapWindow, ms);
@@ -531,10 +568,12 @@ function handleSlap(playerIndex) {
   state.players[playerIndex].slapAnim = Date.now();
   sfx.slap();
   haptic([50]);
+  saveState();
   render();
 }
 
 function resolveSlapWindow() {
+  if (state.phase !== Phase.SLAP_WINDOW) return; // guard against double resolution
   clearTimeout(slapTimeoutId);
   slapTimeoutId = null;
   cancelTimerAnimation();
@@ -1089,7 +1128,7 @@ if (typeof module !== 'undefined' && module.exports) {
     CFG, SlapCond, Phase, FAMILIES, JOKER_DEFS, PLAYER_COLORS, SAVE_KEY,
     mulberry32, shuffle, generateDeck, isIdenticalMatch,
     evaluateSlapCondition, freshState, addLog, pname,
-    startGame, flipCard, handleSlap, resolveSlapWindow,
+    startGame, flipCard, openSlapWindow, handleSlap, resolveSlapWindow,
     pickupPile, advanceToNext, checkGameOver,
     saveState, clearSaveState, loadSaveState, restoreFromSnapshot,
     isSafeReturnPath, getBasePath, exitGame,
