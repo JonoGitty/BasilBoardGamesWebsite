@@ -21,9 +21,13 @@ function toWhatsNewPost(row: PostFeedRow): WhatsNewPost {
   };
 }
 
-/** Fetch published posts for the public What's New feed. */
-export async function fetchPublishedFeed(): Promise<WhatsNewPost[]> {
-  if (!supabase) return [];
+/**
+ * Fetch published posts for the public What's New feed.
+ * Returns `null` only when Supabase is unavailable or request fails,
+ * so callers can safely keep a static fallback in that case.
+ */
+export async function fetchPublishedFeed(): Promise<WhatsNewPost[] | null> {
+  if (!supabase) return null;
 
   const { data, error } = await supabase
     .from('posts')
@@ -32,7 +36,7 @@ export async function fetchPublishedFeed(): Promise<WhatsNewPost[]> {
     .not('published_at', 'is', null)
     .order('published_at', { ascending: false });
 
-  if (error || !data) return [];
+  if (error || !data) return null;
   return (data as PostFeedRow[]).map(toWhatsNewPost);
 }
 
