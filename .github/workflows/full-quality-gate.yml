@@ -1,0 +1,382 @@
+name: Full Quality Gate
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+  VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+jobs:
+  # ── Stage 1: Static Analysis (parallel) ──────────────────────
+  lint:
+    name: 'Stage 1: Lint'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: 'Stage 1: Typecheck'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  # ── Stage 2: Unit Tests ──────────────────────────────────────
+  unit-tests:
+    name: 'Stage 2: Unit tests'
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basil-coverage
+          path: coverage/
+          retention-days: 14
+
+      - name: Classify failures on error
+        if: failure()
+        run: |
+          npm run test 2>&1 | node scripts/diagnostics/ci-failure-report.mjs > unit-failure-report.md || true
+
+      - name: Upload failure diagnosis
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basil-unit-failure-report
+          path: |
+            unit-failure-report.md
+            diagnostics/last-report.json
+          retention-days: 30
+
+  # ── Stage 3: Contract Tests ──────────────────────────────────
+  contract-tests:
+    name: 'Stage 3: Contract tests'
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Run contract tests
+        run: npx vitest run tests/contracts/
+
+      - name: Classify failures on error
+        if: failure()
+        run: |
+          npx vitest run tests/contracts/ 2>&1 | node scripts/diagnostics/ci-failure-report.mjs > contract-failure-report.md || true
+
+      - name: Upload failure diagnosis
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basil-contract-failure-report
+          path: |
+            contract-failure-report.md
+            diagnostics/last-report.json
+          retention-days: 30
+
+  # ── Stage 4: E2E Tests (Basil) ──────────────────────────────
+  e2e-tests:
+    name: 'Stage 4: E2E tests (Basil)'
+    needs: [unit-tests, contract-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Only run when Supabase credentials are available
+    if: ${{ vars.E2E_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+        run: npx playwright test
+
+      - name: Upload E2E screenshots/traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basil-e2e-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+
+  # ── Stage 5: Game Regression (Triarch) ───────────────────────
+  game-regression:
+    name: 'Stage 5: Game regression'
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/Triarch
+          path: triarch
+          token: ${{ secrets.TRIARCH_REPO_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Triarch dependencies
+        run: |
+          if [ -d "triarch" ]; then
+            cd triarch && npm install --omit=dev
+          else
+            echo "::warning::Triarch repo not available, skipping game regression"
+          fi
+
+      - name: Triarch syntax check
+        if: ${{ hashFiles('triarch/package.json') != '' }}
+        run: cd triarch && npm test
+
+      - name: Engine unit tests (35 tests)
+        if: ${{ hashFiles('triarch/test/engine.test.js') != '' }}
+        run: cd triarch && node --test test/engine.test.js
+
+      - name: AI policy tests (8 tests)
+        if: ${{ hashFiles('triarch/test/ai-policy.test.js') != '' }}
+        run: cd triarch && node --test test/ai-policy.test.js
+
+      - name: Engine simulation tests (10 tests)
+        if: ${{ hashFiles('triarch/test/engine-simulation.test.js') != '' }}
+        run: cd triarch && node --test test/engine-simulation.test.js
+
+      - name: File sync check
+        run: |
+          if [ -d "triarch" ] && [ -f "triarch/scripts/check-sync.mjs" ]; then
+            cd triarch && node scripts/check-sync.mjs --json > sync-results.json
+            cat sync-results.json
+          else
+            echo '{"allPassed":true,"note":"Skipped — repo not available"}'
+          fi
+
+      - name: Upload sync results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triarch-sync-results
+          path: triarch/sync-results.json
+          retention-days: 14
+        continue-on-error: true
+
+  # ── Stage 5b: Triarch E2E ───────────────────────────────────
+  triarch-e2e:
+    name: 'Stage 5b: Triarch E2E'
+    needs: [game-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ vars.TRIARCH_E2E_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/Triarch
+          token: ${{ secrets.TRIARCH_REPO_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Triarch E2E tests
+        run: npx playwright test
+
+      - name: Upload Triarch E2E artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triarch-e2e-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+
+  # ── Stage 6: Audits (parallel) ──────────────────────────────
+  security-audit:
+    name: 'Stage 6: Security audit'
+    needs: [unit-tests, contract-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/Triarch
+          path: ../Triarch
+          token: ${{ secrets.TRIARCH_REPO_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Triarch deps
+        run: |
+          if [ -d "../Triarch" ]; then
+            cd ../Triarch && npm install --omit=dev
+          fi
+        continue-on-error: true
+
+      - name: Run security audit
+        run: node scripts/audit/security-audit.mjs
+
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: audit/out/security-audit-report.*
+          retention-days: 30
+
+  privacy-audit:
+    name: 'Stage 6: Privacy audit'
+    needs: [unit-tests, contract-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/Triarch
+          path: ../Triarch
+          token: ${{ secrets.TRIARCH_REPO_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run privacy inventory
+        run: node scripts/audit/privacy-inventory.mjs
+
+      - name: Run privacy drift check
+        run: node scripts/audit/privacy-drift-check.mjs
+
+      - name: Upload privacy reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: privacy-drift-report
+          path: audit/out/privacy-*
+          retention-days: 30
+
+  # ── Stage 7: Build ──────────────────────────────────────────
+  build:
+    name: 'Stage 7: Production build'
+    needs: [unit-tests, contract-tests, game-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+          retention-days: 7
+
+  # ── Gate Summary ────────────────────────────────────────────
+  quality-gate-passed:
+    name: Quality gate passed
+    needs: [build, security-audit, privacy-audit]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check all required gates
+        run: |
+          echo "=== Quality Gate Summary ==="
+          echo "Build:          ${{ needs.build.result }}"
+          echo "Security audit: ${{ needs.security-audit.result }}"
+          echo "Privacy audit:  ${{ needs.privacy-audit.result }}"
+          echo ""
+
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "FAIL: Build did not succeed"
+            exit 1
+          fi
+
+          # Audits are advisory — warn but don't block
+          if [[ "${{ needs.security-audit.result }}" == "failure" ]]; then
+            echo "WARNING: Security audit failed (advisory)"
+          fi
+          if [[ "${{ needs.privacy-audit.result }}" == "failure" ]]; then
+            echo "WARNING: Privacy audit failed (advisory)"
+          fi
+
+          echo ""
+          echo "Quality gate PASSED"

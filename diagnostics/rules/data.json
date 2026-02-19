@@ -1,0 +1,20 @@
+{
+  "category": "data",
+  "rules": [
+    {
+      "pattern": "schema.*mismatch|unexpected.*shape|missing.*column|column.*not.*found",
+      "code": "DATA_SCHEMA_MISMATCH",
+      "confidence": 0.85
+    },
+    {
+      "pattern": "null.*unexpected|undefined.*not.*expected|expected.*object.*got.*null|data.*is.*null",
+      "code": "DATA_NULL_UNEXPECTED",
+      "confidence": 0.8
+    },
+    {
+      "pattern": "duplicate.*key|unique.*constraint|already.*exists|conflict.*client_feedback_id",
+      "code": "DATA_DUPLICATE_KEY",
+      "confidence": 0.9
+    }
+  ]
+}

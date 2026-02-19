@@ -4,8 +4,8 @@ import { toGame, badgeFromStatus } from './gameCatalogApi';
 describe('gameCatalogApi mapping', () => {
   it('maps a live game row to Game with live status', () => {
     const row = {
-      id: 'almost',
-      title: 'Almost',
+      id: 'test-live',
+      title: 'Test Live',
       description: 'A game of near misses.',
       emoji: '\u{1F3AF}',
       url: null,
@@ -17,11 +17,12 @@ describe('gameCatalogApi mapping', () => {
     };
     const game = toGame(row);
     expect(game).toEqual({
-      id: 'almost',
-      title: 'Almost',
+      id: 'test-live',
+      title: 'Test Live',
       description: 'A game of near misses.',
       emoji: '\u{1F3AF}',
       url: undefined,
+      onlineUrl: undefined,
       status: 'live',
       badge: undefined,
       sortOrder: 3,

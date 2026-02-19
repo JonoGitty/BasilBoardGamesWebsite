@@ -1,0 +1,20 @@
+{
+  "category": "render",
+  "rules": [
+    {
+      "pattern": "Cannot read propert|TypeError.*null|TypeError.*undefined|Uncaught.*Error.*render|component.*threw",
+      "code": "RENDER_COMPONENT_CRASH",
+      "confidence": 0.85
+    },
+    {
+      "pattern": "Unable to find.*element|getByText.*not found|queryBy.*returned null|TestingLibraryElementError",
+      "code": "RENDER_MISSING_ELEMENT",
+      "confidence": 0.9
+    },
+    {
+      "pattern": "hydration|server.*client.*mismatch|content.*does not match",
+      "code": "RENDER_HYDRATION_MISMATCH",
+      "confidence": 0.8
+    }
+  ]
+}

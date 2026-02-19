@@ -27,12 +27,18 @@ interface CommandEnvelope<TResult> {
 
 function isEdgeFunctionUnavailable(msg: string): boolean {
   const lower = msg.toLowerCase();
+  // Only match truly-unavailable errors (network failures, DNS, relay errors).
+  // DO NOT match "non-2xx" — the Supabase JS client wraps ALL non-2xx HTTP
+  // responses (including valid 400/401/403/404 business errors) with that string.
+  // Those are application-level errors, not connectivity failures.
   return (
-    lower.includes('non-2xx') ||
     lower.includes('failed to send') ||
-    lower.includes('network') ||
+    lower.includes('networkerror') ||
     lower.includes('fetch failed') ||
-    lower.includes('unknown_command')
+    lower.includes('load failed') ||
+    lower.includes('dns') ||
+    lower.includes('econnrefused') ||
+    lower.includes('enotfound')
   );
 }
 
@@ -64,8 +70,19 @@ async function invokeAdminCommand<TResult>(
     if (resp && typeof resp.json === 'function') {
       try {
         const body = await resp.json();
-        return { ok: false, error: normalizeEdgeFunctionError(body?.error ?? error.message) };
+        const bodyError = body?.error;
+        if (bodyError && typeof bodyError === 'string') {
+          return { ok: false, error: normalizeEdgeFunctionError(bodyError) };
+        }
       } catch { /* fall through */ }
+      // resp.json() failed or body had no error string — derive from HTTP status
+      if (typeof resp.status === 'number') {
+        const statusMsg = resp.status === 401 ? 'Unauthorized — session may have expired'
+          : resp.status === 403 ? 'Forbidden — admin role required'
+          : resp.status === 404 ? 'Command endpoint not found — redeploy edge function'
+          : `Edge function returned HTTP ${resp.status}`;
+        return { ok: false, error: statusMsg };
+      }
     }
     return { ok: false, error: normalizeEdgeFunctionError(error.message) };
   }
@@ -197,28 +214,10 @@ export async function publishPost(
     postId,
     published: true,
   });
-  if (cmd.ok) {
-    return { ok: true };
+  if (!cmd.ok) {
+    return { ok: false, error: cmd.error ?? 'Publish failed' };
   }
-
-  // Resilience fallback: direct table update under admin RLS.
-  if (supabase && isEdgeFunctionUnavailable(cmd.error ?? '')) {
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('posts')
-      .update({ published: true, published_at: now, updated_at: now })
-      .eq('id', postId)
-      .select('id')
-      .maybeSingle();
-    if (!error && data) {
-      return { ok: true };
-    }
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-    return { ok: false, error: `Post "${postId}" was not found` };
-  }
-  return { ok: false, error: cmd.error ?? 'Publish failed' };
+  return { ok: true };
 }
 
 /** Unpublish a post. */
@@ -229,28 +228,10 @@ export async function unpublishPost(
     postId,
     published: false,
   });
-  if (cmd.ok) {
-    return { ok: true };
+  if (!cmd.ok) {
+    return { ok: false, error: cmd.error ?? 'Unpublish failed' };
   }
-
-  // Resilience fallback: direct table update under admin RLS.
-  if (supabase && isEdgeFunctionUnavailable(cmd.error ?? '')) {
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('posts')
-      .update({ published: false, published_at: null, updated_at: now })
-      .eq('id', postId)
-      .select('id')
-      .maybeSingle();
-    if (!error && data) {
-      return { ok: true };
-    }
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-    return { ok: false, error: `Post "${postId}" was not found` };
-  }
-  return { ok: false, error: cmd.error ?? 'Unpublish failed' };
+  return { ok: true };
 }
 
 /** Delete a post. */

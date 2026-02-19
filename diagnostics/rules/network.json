@@ -1,0 +1,30 @@
+{
+  "category": "network",
+  "rules": [
+    {
+      "pattern": "fetch failed|Failed to fetch|ECONNREFUSED|ECONNRESET",
+      "code": "NET_FETCH_FAILED",
+      "confidence": 0.9
+    },
+    {
+      "pattern": "CORS|Access-Control-Allow-Origin|cross-origin",
+      "code": "NET_CORS_BLOCKED",
+      "confidence": 0.95
+    },
+    {
+      "pattern": "timeout|ETIMEDOUT|AbortError|signal.*aborted",
+      "code": "NET_TIMEOUT",
+      "confidence": 0.85
+    },
+    {
+      "pattern": "429|rate.?limit|too many requests|retryAfterSec",
+      "code": "NET_429_RATE_LIMIT",
+      "confidence": 0.9
+    },
+    {
+      "pattern": "500|Internal Server Error|server error",
+      "code": "NET_500_SERVER",
+      "confidence": 0.8
+    }
+  ]
+}

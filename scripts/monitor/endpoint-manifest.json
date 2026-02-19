@@ -1,0 +1,37 @@
+{
+  "version": "1.0.0",
+  "description": "Endpoints to probe during synthetic monitoring. All probes are read-only.",
+  "endpoints": [
+    {
+      "name": "Homepage",
+      "url": "https://basilboardgames.co.uk",
+      "method": "GET",
+      "expect": [200],
+      "contains": "Basil",
+      "timeoutMs": 10000
+    },
+    {
+      "name": "Elam game page",
+      "url": "https://basilboardgames.co.uk/games/elam/",
+      "method": "GET",
+      "expect": [200],
+      "timeoutMs": 10000
+    },
+    {
+      "name": "Feedback ingest CORS preflight",
+      "url": "${SUPABASE_URL}/functions/v1/feedback-ingest",
+      "method": "OPTIONS",
+      "expect": [200, 204],
+      "timeoutMs": 10000
+    },
+    {
+      "name": "Admin command (unauthenticated)",
+      "url": "${SUPABASE_URL}/functions/v1/admin-command",
+      "method": "POST",
+      "body": "{}",
+      "headers": { "Content-Type": "application/json" },
+      "expect": [401, 400],
+      "timeoutMs": 10000
+    }
+  ]
+}

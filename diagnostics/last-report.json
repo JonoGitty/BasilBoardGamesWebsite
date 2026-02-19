@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-02-18T22:22:44.438Z",
+  "failures": [
+    {
+      "test": "component crash test",
+      "category": "config",
+      "code": "CONFIG_TYPE_ERROR",
+      "confidence": 0.85,
+      "suggestion": "Run npx tsc --noEmit, fix type mismatches."
+    },
+    {
+      "test": "import test",
+      "category": "config",
+      "code": "CONFIG_IMPORT_FAILED",
+      "confidence": 0.95,
+      "suggestion": "Check tsconfig paths, verify package is installed, check file extensions."
+    }
+  ]
+}

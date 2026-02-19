@@ -154,6 +154,17 @@
       "retention": "persistent_local",
       "policySection": "6",
       "notes": "Simple boolean flag"
+    },
+    {
+      "id": "game_state",
+      "label": "Almost Game State",
+      "classification": "anonymous",
+      "fields": ["players", "pile", "currentPlayer", "turnCount", "memoryMode", "finishOrder", "settings", "rngState"],
+      "storageLocations": ["localStorage:almost_game_state_v1"],
+      "legalBasis": "legitimate_interest",
+      "retention": "persistent_local",
+      "policySection": "6",
+      "notes": "Local-only game state for resume-on-refresh. No personal data. Cleared on game completion."
     }
   ],
 
@@ -168,7 +179,8 @@
     "elam_online_session_v1": { "category": "elam_online_session", "origin": "elam" },
     "elam_playtest_notice_ack_v1": { "category": "playtest_acknowledgment", "origin": "elam" },
     "elam_telemetry_queue_local_v1": { "category": "analytics_events", "origin": "elam" },
-    "elam_telemetry_queue_online_v1": { "category": "analytics_events", "origin": "elam" }
+    "elam_telemetry_queue_online_v1": { "category": "analytics_events", "origin": "elam" },
+    "almost_game_state_v1": { "category": "game_state", "origin": "almost" }
   },
 
   "sessionStorageKeys": {

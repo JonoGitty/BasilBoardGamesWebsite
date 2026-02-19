@@ -37,10 +37,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check Triarch syntax
+      - name: Check Triarch syntax + unit tests
         run: |
           if [ -d "../Triarch" ]; then
             cd ../Triarch && npm install --omit=dev && npm test
+            node --test test/engine.test.js test/ai-policy.test.js test/engine-simulation.test.js
           else
             echo "Triarch repo not available, skipping"
           fi

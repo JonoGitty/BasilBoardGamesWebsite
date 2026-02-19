@@ -1,0 +1,20 @@
+{
+  "category": "config",
+  "rules": [
+    {
+      "pattern": "VITE_.*not.*defined|process\\.env.*undefined|missing.*env|environment.*variable",
+      "code": "CONFIG_ENV_MISSING",
+      "confidence": 0.9
+    },
+    {
+      "pattern": "Failed to resolve import|Cannot find module|Module not found|ERR_MODULE_NOT_FOUND",
+      "code": "CONFIG_IMPORT_FAILED",
+      "confidence": 0.95
+    },
+    {
+      "pattern": "TS\\d{4}|Type.*is not assignable|Property.*does not exist|type check.*failed|tsc.*error",
+      "code": "CONFIG_TYPE_ERROR",
+      "confidence": 0.85
+    }
+  ]
+}

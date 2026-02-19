@@ -24,10 +24,11 @@ export const GAMES: Game[] = [
   {
     id: 'almost',
     title: 'Almost',
-    description: 'Get as close as you can without going over. A game of near misses and bold guesses.',
+    description: 'Spot the real matches, avoid the lookalikes, and be the first to empty your hand!',
     emoji: '\u{1F3AF}',
     status: 'beta',
     badge: 'beta',
+    url: import.meta.env.BASE_URL + 'games/almost/index.html',
     sortOrder: 3,
   },
   {

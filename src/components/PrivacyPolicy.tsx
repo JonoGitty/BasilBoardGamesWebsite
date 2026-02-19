@@ -155,6 +155,10 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               events from Elam (flushed periodically, consent-gated)
             </li>
             <li>
+              <strong>almost_game_state_v1</strong> &mdash; saved game state for the Almost
+              card game (auto-saved, allows resuming after refresh)
+            </li>
+            <li>
               <strong>Supabase auth tokens</strong> &mdash; login session management
             </li>
           </ul>

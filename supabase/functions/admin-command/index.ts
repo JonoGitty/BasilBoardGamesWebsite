@@ -1,4 +1,8 @@
 // Deno Edge Function — deterministic admin command executor
+// DEPLOY: npx supabase functions deploy admin-command --no-verify-jwt
+// (Gateway JWT verification is disabled because Supabase Auth issues ES256
+//  tokens but the project JWT secret is HS256. The function handles its own
+//  auth via requireAuthenticatedUserId + requireAdmin.)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const POST_CATEGORIES = new Set(["patch", "experiment", "announcement"]);

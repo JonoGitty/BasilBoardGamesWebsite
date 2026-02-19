@@ -1,0 +1,25 @@
+{
+  "category": "game-logic",
+  "rules": [
+    {
+      "pattern": "Invalid action|action.*rejected|not your turn|unsupported action",
+      "code": "GAME_INVALID_ACTION",
+      "confidence": 0.9
+    },
+    {
+      "pattern": "state.*desync|mismatch.*state|stale.*state|out of sync",
+      "code": "GAME_STATE_DESYNC",
+      "confidence": 0.7
+    },
+    {
+      "pattern": "bot.*null|chooseBotAction.*null|no.*legal.*action|bot.*freeze",
+      "code": "GAME_BOT_FREEZE",
+      "confidence": 0.85
+    },
+    {
+      "pattern": "gameOver.*false.*opposite|win.*not.*detected|should.*have.*won",
+      "code": "GAME_WIN_NOT_DETECTED",
+      "confidence": 0.75
+    }
+  ]
+}

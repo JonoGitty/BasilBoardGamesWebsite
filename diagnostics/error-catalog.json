@@ -1,0 +1,160 @@
+{
+  "version": "1.0.0",
+  "categories": ["network", "auth", "game-logic", "render", "config", "data"],
+  "errors": [
+    {
+      "code": "NET_FETCH_FAILED",
+      "category": "network",
+      "message": "Network request failed (fetch error or timeout)",
+      "remediation": "Check network connectivity, verify VITE_SUPABASE_URL, inspect CORS config.",
+      "confidence": 0.9
+    },
+    {
+      "code": "NET_CORS_BLOCKED",
+      "category": "network",
+      "message": "CORS policy blocked the request",
+      "remediation": "Verify Supabase edge function CORS headers include the requesting origin.",
+      "confidence": 0.95
+    },
+    {
+      "code": "NET_TIMEOUT",
+      "category": "network",
+      "message": "Request timed out",
+      "remediation": "Check server health, increase timeout, verify endpoint availability.",
+      "confidence": 0.85
+    },
+    {
+      "code": "NET_429_RATE_LIMIT",
+      "category": "network",
+      "message": "Rate limited by server (429)",
+      "remediation": "Reduce request frequency, implement exponential backoff.",
+      "confidence": 0.95
+    },
+    {
+      "code": "NET_500_SERVER",
+      "category": "network",
+      "message": "Server returned 500 Internal Server Error",
+      "remediation": "Check server logs, verify edge function deployment, check DB connectivity.",
+      "confidence": 0.9
+    },
+    {
+      "code": "AUTH_SESSION_EXPIRED",
+      "category": "auth",
+      "message": "Auth session expired or invalid",
+      "remediation": "Re-authenticate, check token refresh logic, verify session TTL.",
+      "confidence": 0.9
+    },
+    {
+      "code": "AUTH_MISSING_TOKEN",
+      "category": "auth",
+      "message": "Auth token missing from request",
+      "remediation": "Verify AuthContext provides token, check supabase.auth.getSession().",
+      "confidence": 0.85
+    },
+    {
+      "code": "AUTH_UNAUTHORIZED",
+      "category": "auth",
+      "message": "User lacks required role or permission",
+      "remediation": "Check admin role assignment, verify RLS policies.",
+      "confidence": 0.9
+    },
+    {
+      "code": "AUTH_SIGNUP_FAILED",
+      "category": "auth",
+      "message": "Signup failed (duplicate email, weak password, etc.)",
+      "remediation": "Check Supabase auth settings, verify email uniqueness, password policy.",
+      "confidence": 0.8
+    },
+    {
+      "code": "GAME_INVALID_ACTION",
+      "category": "game-logic",
+      "message": "Game engine rejected the action",
+      "remediation": "Check action payload matches engine schema, verify game phase.",
+      "confidence": 0.9
+    },
+    {
+      "code": "GAME_STATE_DESYNC",
+      "category": "game-logic",
+      "message": "Client and server game state diverged",
+      "remediation": "Force state refresh from server, check event ordering.",
+      "confidence": 0.7
+    },
+    {
+      "code": "GAME_BOT_FREEZE",
+      "category": "game-logic",
+      "message": "Bot failed to produce an action (null return)",
+      "remediation": "Check enumerateLegalActions output, verify bot profile weights.",
+      "confidence": 0.85
+    },
+    {
+      "code": "GAME_WIN_NOT_DETECTED",
+      "category": "game-logic",
+      "message": "Win condition met but gameOver not set",
+      "remediation": "Check checkWin and enforceWinFromCarrierPosition logic.",
+      "confidence": 0.8
+    },
+    {
+      "code": "RENDER_COMPONENT_CRASH",
+      "category": "render",
+      "message": "React component threw during render",
+      "remediation": "Check error boundary logs, verify prop types, look for null access.",
+      "confidence": 0.9
+    },
+    {
+      "code": "RENDER_MISSING_ELEMENT",
+      "category": "render",
+      "message": "Expected DOM element not found",
+      "remediation": "Check component conditionals, verify test selectors match current markup.",
+      "confidence": 0.85
+    },
+    {
+      "code": "RENDER_HYDRATION_MISMATCH",
+      "category": "render",
+      "message": "Server/client markup mismatch",
+      "remediation": "Check for client-only code in SSR paths, avoid Date.now() in render.",
+      "confidence": 0.8
+    },
+    {
+      "code": "CONFIG_ENV_MISSING",
+      "category": "config",
+      "message": "Required environment variable not set",
+      "remediation": "Run scripts/test/setup-env.mjs, check .env file.",
+      "confidence": 0.95
+    },
+    {
+      "code": "CONFIG_IMPORT_FAILED",
+      "category": "config",
+      "message": "Module import/resolve failed",
+      "remediation": "Check tsconfig paths, verify package is installed, check file extensions.",
+      "confidence": 0.9
+    },
+    {
+      "code": "CONFIG_TYPE_ERROR",
+      "category": "config",
+      "message": "TypeScript type check failed",
+      "remediation": "Run npx tsc --noEmit, fix type mismatches.",
+      "confidence": 0.95
+    },
+    {
+      "code": "DATA_SCHEMA_MISMATCH",
+      "category": "data",
+      "message": "Data does not match expected schema shape",
+      "remediation": "Check migration version, verify fixture factory matches current types.",
+      "confidence": 0.85
+    },
+    {
+      "code": "DATA_NULL_UNEXPECTED",
+      "category": "data",
+      "message": "Received null/undefined where data was expected",
+      "remediation": "Check Supabase query, verify RLS allows access, check table exists.",
+      "confidence": 0.8
+    },
+    {
+      "code": "DATA_DUPLICATE_KEY",
+      "category": "data",
+      "message": "Unique constraint violation",
+      "remediation": "Check client_feedback_id or other unique columns, handle duplicates.",
+      "confidence": 0.9
+    }
+  ]
+}

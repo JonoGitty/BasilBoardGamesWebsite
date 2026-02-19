@@ -38,6 +38,9 @@ dist-ssr
 
 # Supabase local state
 supabase/.temp/
+supabase/config.toml
+supabase/.branches/
+.supabase/
 
 # Design inspiration / private assets
 INSPO/

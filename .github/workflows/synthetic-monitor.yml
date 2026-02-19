@@ -1,0 +1,50 @@
+name: Synthetic Monitor
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # daily at 8am UTC
+  workflow_dispatch:
+
+jobs:
+  probe:
+    name: Probe endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run synthetic checks
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        run: node scripts/monitor/synthetic-checks.mjs --json > monitor-results.json
+        continue-on-error: true
+
+      - name: Display results
+        run: cat monitor-results.json | node -e "
+          const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+          console.log('Passed:', data.passed, '/', data.total);
+          if (data.failed > 0) {
+            console.log('FAILURES:');
+            data.results.filter(r => r.status === 'fail').forEach(r => {
+              console.log(' -', r.name, ':', r.error);
+            });
+          }
+        "
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-monitor-results
+          path: monitor-results.json
+          retention-days: 30
+
+      - name: Fail if any checks failed
+        run: |
+          node -e "
+            const data = JSON.parse(require('fs').readFileSync('monitor-results.json','utf8'));
+            if (!data.allPassed) process.exit(1);
+          "

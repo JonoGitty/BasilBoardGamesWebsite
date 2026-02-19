@@ -51,11 +51,18 @@ let aiTimer = null;
 let feedbackRetryTimer = null;
 let feedbackQueueBusy = false;
 let feedbackQueueMemory = [];
+let gameStartedAt = null;
+let gameActionCount = 0;
 
 const FEEDBACK_QUEUE_KEY_LOCAL = "elam_feedback_queue_local_v1";
 const FEEDBACK_QUEUE_MAX = 400;
 const FEEDBACK_RETRY_MS = 15000;
 const PLAYTEST_GATE_ACK_KEY = "elam_playtest_notice_ack_v1";
+
+const TELEMETRY_QUEUE_KEY = "elam_telemetry_queue_local_v1";
+const TELEMETRY_QUEUE_MAX = 100;
+const TELEMETRY_FLUSH_INTERVAL_MS = 30000;
+let telemetryFlushTimer = null;
 
 const AI_PROFILES = [
   {
@@ -2375,6 +2382,78 @@ resetGame();
 initFeedbackQueue();
 initTelemetryQueue();
 
+// ---------- E2E test hooks (active only with ?e2e=1) ----------
+if (new URLSearchParams(window.location.search).get("e2e") === "1") {
+  window.__ELAM_TEST__ = {
+    /** Return a JSON-safe snapshot of the full game state. */
+    getStateSnapshot() {
+      if (!state) return null;
+      return {
+        phase: state.phase,
+        setupMode: state.setupMode,
+        current: state.current,
+        currentPlayerId: state.players[state.current]?.id ?? null,
+        currentPlayerIsAI: !!state.players[state.current]?.isAI,
+        gameOver: state.gameOver,
+        winner: state.winner,
+        lastMessage: state.lastMessage,
+        placingShape: state.placingShape,
+        selected: state.selected ? { ...state.selected } : null,
+        gameActionCount: typeof gameActionCount !== "undefined" ? gameActionCount : 0,
+        players: state.players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          side: p.side,
+          isAI: !!p.isAI,
+        })),
+        flagCarriedBy: state.flag.carriedBy,
+        flagInZone: state.flag.zone,
+        board: state.board.map((row) =>
+          row.map((cell) =>
+            cell
+              ? {
+                  playerId: cell.playerId,
+                  shape: cell.shape,
+                  height: cell.height,
+                  hasFlag: !!cell.hasFlag,
+                }
+              : null
+          )
+        ),
+        supplies: state.supplies,
+      };
+    },
+
+    /** Switch AI speed to "fast" (80ms) for deterministic pacing. */
+    forceAiSpeedFast() {
+      if (aiSpeedSelect) aiSpeedSelect.value = "fast";
+    },
+
+    /**
+     * If an AI turn timer is pending, clear it and run the AI turn now.
+     * Returns true if a turn was flushed.
+     */
+    flushAiTurnIfPending() {
+      if (!aiTimer) return false;
+      clearTimeout(aiTimer);
+      aiTimer = null;
+      const p = currentPlayer();
+      if (!p || !p.isAI) return false;
+      if (state.phase === "setup" && state.setupMode === "turn") {
+        runAiSetupTurn();
+      } else if (state.phase === "play") {
+        runAiTurn();
+      }
+      return true;
+    },
+  };
+  // Auto-dismiss playtest gate in E2E mode
+  if (playtestGateEl) {
+    playtestGateEl.classList.add("is-hidden");
+    document.body.classList.remove("gate-open");
+  }
+}
+
 // ---------- Dev log (file-based) ----------
 function logDev(message) {
   fetch("/log", {
@@ -2630,12 +2709,6 @@ function buildLocalFeedbackContext() {
 }
 
 // ---------- Telemetry ----------
-const TELEMETRY_QUEUE_KEY = "elam_telemetry_queue_local_v1";
-const TELEMETRY_QUEUE_MAX = 100;
-const TELEMETRY_FLUSH_INTERVAL_MS = 30000;
-let telemetryFlushTimer = null;
-let gameStartedAt = null;
-let gameActionCount = 0;
 
 function getEventsIngestUrl() {
   return (typeof window !== "undefined" && window.BASIL_EVENTS_INGEST_URL) || "";
