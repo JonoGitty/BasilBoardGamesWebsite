@@ -2,6 +2,14 @@ import type { WhatsNewPost } from '../types/whatsNew';
 
 export const WHATS_NEW_POSTS: WhatsNewPost[] = [
   {
+    id: 'ann-elam-multiplayer-support',
+    title: 'Elam Multiplayer Support Is Live',
+    description: 'You can now play Elam in multiplayer mode. We will keep tuning stability and game flow, so please keep the feedback coming.',
+    emoji: '\u{1F91D}',
+    category: 'announcement',
+    publishedAt: '2026-02-19',
+  },
+  {
     id: 'patch-elam-ai-ladder',
     title: 'Elam AI Difficulty Upgrade',
     description: 'Overhauled the four AI difficulty levels. Normal is now noticeably smarter, hard uses 2-ply lookahead to avoid traps, and competitive plays a cautious fortress style with escort and route-blocking tactics.',
